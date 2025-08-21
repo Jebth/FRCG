@@ -101,7 +101,7 @@
         }
         
         .message-group.right .message-group-content {
-            flex-direction: row-reverse;
+            flex-direction: row; /* Changed from row-reverse to row */
         }
         
         .profile-pic {
@@ -115,8 +115,9 @@
         }
         
         .message-group.right .profile-pic {
-            margin-right: 0;
-            margin-left: 8px;
+            margin-right: 8px; /* Fixed margin issue */
+            margin-left: 0; /* Removed left margin */
+            order: -1; /* Make profile picture appear first */
         }
         
         .username {
@@ -388,7 +389,7 @@
         // Default profile pictures
         const defaultProfilePics = {
             left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
-            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE8MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTg1NyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
+            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
         };
         
         // Initialize from localStorage
@@ -616,12 +617,11 @@
                 const groupContent = document.createElement('div');
                 groupContent.className = 'message-group-content';
                 
-                if (group.align === 'left') {
-                    const profilePic = document.createElement('img');
-                    profilePic.src = group.profilePic;
-                    profilePic.className = 'profile-pic';
-                    groupContent.appendChild(profilePic);
-                }
+                // Always add profile picture first
+                const profilePic = document.createElement('img');
+                profilePic.src = group.profilePic;
+                profilePic.className = 'profile-pic';
+                groupContent.appendChild(profilePic);
                 
                 const messageContent = document.createElement('div');
                 messageContent.className = 'message-content';
@@ -647,14 +647,6 @@
                 });
                 
                 groupContent.appendChild(messageContent);
-                
-                if (group.align === 'right') {
-                    const profilePic = document.createElement('img');
-                    profilePic.src = group.profilePic;
-                    profilePic.className = 'profile-pic';
-                    groupContent.appendChild(profilePic);
-                }
-                
                 messageGroup.appendChild(groupContent);
                 chatArea.appendChild(messageGroup);
             });
