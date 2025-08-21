@@ -120,6 +120,19 @@
             margin-left: 8px;
         }
         
+        .username {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 5px;
+            margin-left: 40px;
+        }
+        
+        .message-group.right .username {
+            margin-left: 0;
+            margin-right: 40px;
+            text-align: right;
+        }
+        
         .message {
             display: inline-block;
             background: #313139;
@@ -244,6 +257,17 @@
             display: none;
         }
         
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -298,6 +322,11 @@
                 <option value="right">Right (You)</option>
             </select>
             
+            <div class="checkbox-group">
+                <input type="checkbox" id="showUsername" checked>
+                <label for="showUsername">Show Username</label>
+            </div>
+            
             <div class="file-input-wrapper">
                 <input type="file" id="messageProfilePic" class="file-input" accept="image/*">
                 <label for="messageProfilePic" class="file-input-label">Upload Profile Picture (Override)</label>
@@ -325,7 +354,7 @@
         <div class="phone-frame" id="phoneFrame">
             <div class="chat-header">
                 <span class="back-arrow">←</span>
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTg1NyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==" class="header-profile" id="headerProfilePicImg">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEw IDEA4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTg1NyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==" class="header-profile" id="headerProfilePicImg">
                 <span class="header-name" id="headerNameSpan">Akaku</span>
             </div>
             <div class="chat-area" id="chatArea"></div>
@@ -510,6 +539,7 @@
             const username = document.getElementById('messageUsername').value || 'User';
             const text = document.getElementById('messageText').value;
             const align = document.getElementById('messageAlign').value;
+            const showUsername = document.getElementById('showUsername').checked;
             const profilePicFile = document.getElementById('messageProfilePic').files[0];
             const imageFile = document.getElementById('messageImage').files[0];
             
@@ -524,7 +554,8 @@
                 text,
                 align,
                 profilePic: defaultProfilePics[align],
-                image: null
+                image: null,
+                showUsername
             };
             
             // Use saved character's profile pic if selected and no override provided
@@ -592,6 +623,7 @@
                         username: message.username,
                         align: message.align,
                         profilePic: message.profilePic,
+                        showUsername: message.showUsername,
                         messages: []
                     };
                     groupedMessages.push(currentGroup);
@@ -604,6 +636,14 @@
             groupedMessages.forEach(group => {
                 const messageGroup = document.createElement('div');
                 messageGroup.className = `message-group ${group.align}`;
+                
+                // Only show username if enabled
+                if (group.showUsername) {
+                    const username = document.createElement('div');
+                    username.className = 'username';
+                    username.textContent = group.username;
+                    messageGroup.appendChild(username);
+                }
                 
                 group.messages.forEach((msg, index) => {
                     const messageRow = document.createElement('div');
@@ -714,7 +754,8 @@
                         text: 'yea?',
                         align: 'left',
                         profilePic: defaultProfilePics.left,
-                        image: null
+                        image: null,
+                        showUsername: true
                     },
                     {
                         id: 2,
@@ -722,7 +763,8 @@
                         text: 'i didnt know roblox now has',
                         align: 'right',
                         profilePic: defaultProfilePics.right,
-                        image: null
+                        image: null,
+                        showUsername: true
                     },
                     {
                         id: 3,
@@ -730,7 +772,8 @@
                         text: 'something like this',
                         align: 'right',
                         profilePic: defaultProfilePics.right,
-                        image: null
+                        image: null,
+                        showUsername: true
                     },
                     {
                         id: 4,
@@ -738,7 +781,8 @@
                         text: 'xD',
                         align: 'right',
                         profilePic: defaultProfilePics.right,
-                        image: null
+                        image: null,
+                        showUsername: true
                     }
                 ];
                 saveData();
