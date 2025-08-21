@@ -101,7 +101,7 @@
         }
         
         .message-group.right .message-group-content {
-            flex-direction: row; /* Changed from row-reverse to row */
+            flex-direction: row-reverse;
         }
         
         .profile-pic {
@@ -110,14 +110,16 @@
             border-radius: 50%;
             object-fit: cover;
             margin-right: 8px;
-            align-self: flex-end;
+            align-self: flex-start; /* Changed from flex-end to flex-start to position higher */
             flex-shrink: 0;
+            margin-top: 5px; /* Added to position higher */
         }
         
         .message-group.right .profile-pic {
-            margin-right: 8px; /* Fixed margin issue */
-            margin-left: 0; /* Removed left margin */
-            order: -1; /* Make profile picture appear first */
+            margin-right: 0;
+            margin-left: 8px;
+            align-self: flex-start; /* Changed from default to position higher */
+            margin-top: 5px; /* Added to position higher */
         }
         
         .username {
@@ -374,7 +376,7 @@
         <div class="phone-frame" id="phoneFrame">
             <div class="chat-header">
                 <span class="back-arrow">←</span>
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==" class="header-profile" id="headerProfilePicImg">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw=" class="header-profile" id="headerProfilePicImg">
                 <span class="header-name" id="headerNameSpan">Akaku</span>
             </div>
             <div class="chat-area" id="chatArea"></div>
@@ -388,8 +390,8 @@
         
         // Default profile pictures
         const defaultProfilePics = {
-            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
-            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
+            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTg1NyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
+            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTg1NyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
         };
         
         // Initialize from localStorage
@@ -553,7 +555,7 @@
                 username: character.name,
                 text,
                 align,
-                profilePic: align === 'right' ? defaultProfilePics.right : character.avatar,
+                profilePic: character.avatar, // Always use character avatar
                 image: null
             };
             
@@ -617,11 +619,12 @@
                 const groupContent = document.createElement('div');
                 groupContent.className = 'message-group-content';
                 
-                // Always add profile picture first
-                const profilePic = document.createElement('img');
-                profilePic.src = group.profilePic;
-                profilePic.className = 'profile-pic';
-                groupContent.appendChild(profilePic);
+                if (group.align === 'left') {
+                    const profilePic = document.createElement('img');
+                    profilePic.src = group.profilePic;
+                    profilePic.className = 'profile-pic';
+                    groupContent.appendChild(profilePic);
+                }
                 
                 const messageContent = document.createElement('div');
                 messageContent.className = 'message-content';
@@ -647,6 +650,14 @@
                 });
                 
                 groupContent.appendChild(messageContent);
+                
+                if (group.align === 'right') {
+                    const profilePic = document.createElement('img');
+                    profilePic.src = group.profilePic;
+                    profilePic.className = 'profile-pic';
+                    groupContent.appendChild(profilePic);
+                }
+                
                 messageGroup.appendChild(groupContent);
                 chatArea.appendChild(messageGroup);
             });
