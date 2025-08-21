@@ -82,6 +82,7 @@
             overflow-y: auto;
             padding: 20px;
             position: relative;
+            background: #121214;
         }
         
         .message-group {
@@ -100,6 +101,7 @@
             object-fit: cover;
             margin-right: 8px;
             vertical-align: top;
+            display: inline-block;
         }
         
         .message-group.right .profile-pic {
@@ -234,6 +236,15 @@
             margin-top: 20px;
         }
         
+        .character-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-top: 10px;
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -270,6 +281,7 @@
                 <input type="file" id="characterProfilePic" class="file-input" accept="image/*">
                 <label for="characterProfilePic" class="file-input-label">Upload Character Profile Picture</label>
             </div>
+            <img id="characterPreview" class="character-preview" alt="Character preview">
             <button onclick="saveCharacter()">Save Character</button>
             <div class="message-list" id="characterList"></div>
             <button onclick="clearAllCharacters()">Clear All Characters</button>
@@ -365,7 +377,7 @@
         
         // Default profile pictures
         const defaultProfilePics = {
-            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
+            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTDDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
             right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
         };
         
@@ -386,6 +398,20 @@
         document.getElementById('headerName').addEventListener('input', function(e) {
             document.getElementById('headerNameSpan').textContent = e.target.value;
             saveHeaderData();
+        });
+        
+        // Character profile picture preview
+        document.getElementById('characterProfilePic').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('characterPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
         });
         
         // Character selection
@@ -431,6 +457,7 @@
         function clearCharacterInputs() {
             document.getElementById('characterName').value = '';
             document.getElementById('characterProfilePic').value = '';
+            document.getElementById('characterPreview').style.display = 'none';
         }
         
         function renderCharacters() {
@@ -443,7 +470,10 @@
                 const item = document.createElement('div');
                 item.className = 'message-item';
                 item.innerHTML = `
-                    <span>${char.name}</span>
+                    <div style="display: flex; align-items: center;">
+                        <img src="${char.profilePic}" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px; object-fit: cover;">
+                        <span>${char.name}</span>
+                    </div>
                     <button class="delete-btn" onclick="deleteCharacter(${index})">Delete</button>
                 `;
                 characterList.appendChild(item);
@@ -494,7 +524,8 @@
                 text,
                 align,
                 profilePic: defaultProfilePics[align],
-                image: null
+                image: null,
+                showProfilePic: true // Flag to indicate if profile pic should be shown
             };
             
             // Use saved character's profile pic if selected and no override provided
@@ -532,6 +563,14 @@
             }
             
             Promise.all(promises).then(() => {
+                // Check if the previous message was from the same user and alignment
+                if (messages.length > 0) {
+                    const lastMessage = messages[messages.length - 1];
+                    if (lastMessage.username === message.username && lastMessage.align === message.align) {
+                        message.showProfilePic = false;
+                    }
+                }
+                
                 messages.push(message);
                 saveData();
                 renderMessages();
@@ -580,11 +619,12 @@
                 username.textContent = group.username;
                 messageGroup.appendChild(username);
                 
-                group.messages.forEach(msg => {
+                group.messages.forEach((msg, index) => {
                     const messageDiv = document.createElement('div');
                     messageDiv.style.marginBottom = '5px';
                     
-                    if (group.align === 'left') {
+                    // Only show profile picture for the first message in the group
+                    if (group.align === 'left' && index === 0) {
                         const profilePic = document.createElement('img');
                         profilePic.src = group.profilePic;
                         profilePic.className = 'profile-pic';
@@ -610,7 +650,8 @@
                     
                     messageDiv.appendChild(messageBubble);
                     
-                    if (group.align === 'right') {
+                    // Only show profile picture for the first message in the group
+                    if (group.align === 'right' && index === 0) {
                         const profilePic = document.createElement('img');
                         profilePic.src = group.profilePic;
                         profilePic.className = 'profile-pic';
@@ -622,6 +663,9 @@
                 
                 chatArea.appendChild(messageGroup);
             });
+            
+            // Scroll to bottom of chat
+            chatArea.scrollTop = chatArea.scrollHeight;
             
             // Render message list
             messageList.innerHTML = '';
@@ -657,6 +701,10 @@
             // Get device pixel ratio for crisp images on retina displays
             const dpr = window.devicePixelRatio || 1;
             
+            // Temporarily set explicit background color for export
+            const originalBg = phoneFrame.style.background;
+            phoneFrame.style.background = '#121214';
+            
             html2canvas(phoneFrame, {
                 backgroundColor: '#121214',
                 scale: dpr,
@@ -673,6 +721,9 @@
                 windowWidth: 375,
                 windowHeight: 667
             }).then(canvas => {
+                // Restore original background
+                phoneFrame.style.background = originalBg;
+                
                 const outputCanvas = document.createElement('canvas');
                 const outputCtx = outputCanvas.getContext('2d');
                 
@@ -688,6 +739,8 @@
             }).catch(error => {
                 console.error('Error generating image:', error);
                 alert('Error generating image. Please try again.');
+                // Restore original background in case of error
+                phoneFrame.style.background = originalBg;
             });
         }
         
@@ -706,7 +759,8 @@
                         text: 'yea?',
                         align: 'left',
                         profilePic: defaultProfilePics.left,
-                        image: null
+                        image: null,
+                        showProfilePic: true
                     },
                     {
                         id: 2,
@@ -714,7 +768,8 @@
                         text: 'i didnt know roblox now has',
                         align: 'right',
                         profilePic: defaultProfilePics.right,
-                        image: null
+                        image: null,
+                        showProfilePic: true
                     },
                     {
                         id: 3,
@@ -722,7 +777,8 @@
                         text: 'something like this',
                         align: 'right',
                         profilePic: defaultProfilePics.right,
-                        image: null
+                        image: null,
+                        showProfilePic: false
                     },
                     {
                         id: 4,
@@ -730,7 +786,8 @@
                         text: 'xD',
                         align: 'right',
                         profilePic: defaultProfilePics.right,
-                        image: null
+                        image: null,
+                        showProfilePic: false
                     }
                 ];
                 saveData();
