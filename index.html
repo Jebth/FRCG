@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Roblox Chat Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: #1a1a1a;
+            color: white;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .controls {
+            width: 350px;
+            background: #2a2a2a;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 2px solid #333;
+        }
+        
+        .preview-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 20px;
+        }
+        
+        .phone-frame {
+            width: 375px;
+            height: 667px;
+            background: #121214;
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        
+        .chat-header {
+            background: #121214;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .back-arrow {
+            font-size: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        
+        .header-profile {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+        
+        .header-name {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .chat-area {
+            height: calc(100% - 70px);
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .message-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .message-group.right {
+            text-align: right;
+        }
+        
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+            vertical-align: top;
+        }
+        
+        .message-group.right .profile-pic {
+            margin-right: 0;
+            margin-left: 8px;
+        }
+        
+        .username {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 5px;
+            margin-left: 40px;
+        }
+        
+        .message-group.right .username {
+            margin-left: 0;
+            margin-right: 40px;
+            text-align: right;
+        }
+        
+        .message {
+            display: inline-block;
+            background: #313139;
+            padding: 10px 14px;
+            border-radius: 18px;
+            max-width: 250px;
+            word-wrap: break-word;
+            margin: 2px 0;
+            font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+            cursor: move;
+        }
+        
+        .message.dragging {
+            opacity: 0.7;
+            transform: scale(1.05);
+            z-index: 1000;
+        }
+        
+        .message-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 12px;
+            display: block;
+            margin: 5px 0;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group h3 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #555;
+            background: #333;
+            color: white;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+        
+        button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background: #3a8eef;
+        }
+        
+        .message-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #555;
+            background: #333;
+            border-radius: 5px;
+        }
+        
+        .message-item {
+            padding: 8px;
+            border-bottom: 1px solid #555;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .message-item:hover {
+            background: #444;
+        }
+        
+        .delete-btn {
+            background: #ff4757;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 10px;
+            background: #555;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        
+        .file-input-label:hover {
+            background: #666;
+        }
+        
+        .export-section {
+            border-top: 2px solid #333;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .controls {
+                width: 100%;
+                height: 300px;
+            }
+            .preview-container {
+                height: calc(100vh - 300px);
+            }
+            .phone-frame {
+                width: 90%;
+                max-width: 375px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <div class="control-group">
+            <h3>Chat Header</h3>
+            <input type="text" id="headerName" placeholder="Header name" value="Akaku">
+            <div class="file-input-wrapper">
+                <input type="file" id="headerProfilePic" class="file-input" accept="image/*">
+                <label for="headerProfilePic" class="file-input-label">Upload Header Profile Picture</label>
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h3>Add Message</h3>
+            <input type="text" id="messageUsername" placeholder="Username" value="jerriiiii">
+            <textarea id="messageText" placeholder="Message text" rows="3"></textarea>
+            <select id="messageAlign">
+                <option value="left">Left (Other user)</option>
+                <option value="right">Right (You)</option>
+            </select>
+            <div class="file-input-wrapper">
+                <input type="file" id="messageProfilePic" class="file-input" accept="image/*">
+                <label for="messageProfilePic" class="file-input-label">Upload Profile Picture</label>
+            </div>
+            <div class="file-input-wrapper">
+                <input type="file" id="messageImage" class="file-input" accept="image/*">
+                <label for="messageImage" class="file-input-label">Upload Message Image</label>
+            </div>
+            <button onclick="addMessage()">Add Message</button>
+        </div>
+        
+        <div class="control-group">
+            <h3>Message List</h3>
+            <div class="message-list" id="messageList"></div>
+            <button onclick="clearAllMessages()">Clear All Messages</button>
+        </div>
+        
+        <div class="control-group export-section">
+            <h3>Export</h3>
+            <button onclick="downloadImage()">Download as PNG</button>
+        </div>
+    </div>
+    
+    <div class="preview-container">
+        <div class="phone-frame" id="phoneFrame">
+            <div class="chat-header">
+                <span class="back-arrow">←</span>
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==" class="header-profile" id="headerProfilePicImg">
+                <span class="header-name" id="headerNameSpan">Akaku</span>
+            </div>
+            <div class="chat-area" id="chatArea"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        let messages = [];
+        let draggedElement = null;
+        let dragOffset = { x: 0, y: 0 };
+        let originalPosition = { x: 0, y: 0 };
+        
+        // Default profile pictures
+        const defaultProfilePics = {
+            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
+            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE4LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
+        };
+        
+        // Header profile picture upload
+        document.getElementById('headerProfilePic').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('headerProfilePicImg').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Header name update
+        document.getElementById('headerName').addEventListener('input', function(e) {
+            document.getElementById('headerNameSpan').textContent = e.target.value;
+        });
+        
+        function addMessage() {
+            const username = document.getElementById('messageUsername').value || 'User';
+            const text = document.getElementById('messageText').value;
+            const align = document.getElementById('messageAlign').value;
+            const profilePicFile = document.getElementById('messageProfilePic').files[0];
+            const imageFile = document.getElementById('messageImage').files[0];
+            
+            if (!text && !imageFile) {
+                alert('Please enter message text or upload an image');
+                return;
+            }
+            
+            const message = {
+                id: Date.now(),
+                username,
+                text,
+                align,
+                profilePic: defaultProfilePics[align],
+                image: null
+            };
+            
+            const promises = [];
+            
+            // Handle profile picture
+            if (profilePicFile) {
+                promises.push(new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        message.profilePic = e.target.result;
+                        resolve();
+                    };
+                    reader.readAsDataURL(profilePicFile);
+                }));
+            }
+            
+            // Handle message image
+            if (imageFile) {
+                promises.push(new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        message.image = e.target.result;
+                        resolve();
+                    };
+                    reader.readAsDataURL(imageFile);
+                }));
+            }
+            
+            Promise.all(promises).then(() => {
+                messages.push(message);
+                renderMessages();
+                clearInputs();
+            });
+        }
+        
+        function clearInputs() {
+            document.getElementById('messageText').value = '';
+            document.getElementById('messageProfilePic').value = '';
+            document.getElementById('messageImage').value = '';
+        }
+        
+        function renderMessages() {
+            const chatArea = document.getElementById('chatArea');
+            const messageList = document.getElementById('messageList');
+            
+            // Group messages by user and alignment
+            const groupedMessages = [];
+            let currentGroup = null;
+            
+            messages.forEach(message => {
+                if (!currentGroup || 
+                    currentGroup.username !== message.username || 
+                    currentGroup.align !== message.align) {
+                    currentGroup = {
+                        username: message.username,
+                        align: message.align,
+                        profilePic: message.profilePic,
+                        messages: []
+                    };
+                    groupedMessages.push(currentGroup);
+                }
+                currentGroup.messages.push(message);
+            });
+            
+            // Render chat area
+            chatArea.innerHTML = '';
+            groupedMessages.forEach(group => {
+                const messageGroup = document.createElement('div');
+                messageGroup.className = `message-group ${group.align}`;
+                
+                const username = document.createElement('div');
+                username.className = 'username';
+                username.textContent = group.username;
+                messageGroup.appendChild(username);
+                
+                group.messages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.style.marginBottom = '5px';
+                    messageDiv.style.position = 'relative';
+                    
+                    if (group.align === 'left') {
+                        const profilePic = document.createElement('img');
+                        profilePic.src = group.profilePic;
+                        profilePic.className = 'profile-pic';
+                        messageDiv.appendChild(profilePic);
+                    }
+                    
+                    const messageBubble = document.createElement('div');
+                    messageBubble.className = 'message';
+                    messageBubble.dataset.messageId = msg.id;
+                    messageBubble.addEventListener('mousedown', startDrag);
+                    
+                    if (msg.text) {
+                        const textSpan = document.createElement('span');
+                        textSpan.textContent = msg.text;
+                        messageBubble.appendChild(textSpan);
+                    }
+                    
+                    if (msg.image) {
+                        const img = document.createElement('img');
+                        img.src = msg.image;
+                        img.className = 'message-image';
+                        messageBubble.appendChild(img);
+                    }
+                    
+                    messageDiv.appendChild(messageBubble);
+                    
+                    if (group.align === 'right') {
+                        const profilePic = document.createElement('img');
+                        profilePic.src = group.profilePic;
+                        profilePic.className = 'profile-pic';
+                        messageDiv.appendChild(profilePic);
+                    }
+                    
+                    messageGroup.appendChild(messageDiv);
+                });
+                
+                chatArea.appendChild(messageGroup);
+            });
+            
+            // Render message list
+            messageList.innerHTML = '';
+            messages.forEach((msg, index) => {
+                const item = document.createElement('div');
+                item.className = 'message-item';
+                item.innerHTML = `
+                    <span>${msg.username}: ${msg.text ? msg.text.substring(0, 20) + (msg.text.length > 20 ? '...' : '') : '[Image]'}</span>
+                    <button class="delete-btn" onclick="deleteMessage(${index})">Delete</button>
+                `;
+                messageList.appendChild(item);
+            });
+        }
+        
+        function deleteMessage(index) {
+            messages.splice(index, 1);
+            renderMessages();
+        }
+        
+        function clearAllMessages() {
+            if (confirm('Are you sure you want to clear all messages?')) {
+                messages = [];
+                renderMessages();
+            }
+        }
+        
+        // Drag functionality
+        function startDrag(e) {
+            draggedElement = e.target;
+            draggedElement.classList.add('dragging');
+            
+            // Store original position
+            originalPosition.x = draggedElement.offsetLeft;
+            originalPosition.y = draggedElement.offsetTop;
+            
+            const rect = draggedElement.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            e.preventDefault();
+        }
+        
+        function drag(e) {
+            if (draggedElement) {
+                const chatRect = document.getElementById('chatArea').getBoundingClientRect();
+                const x = e.clientX - chatRect.left - dragOffset.x;
+                const y = e.clientY - chatRect.top - dragOffset.y;
+                
+                // Calculate boundaries
+                const maxX = chatRect.width - draggedElement.offsetWidth;
+                const maxY = chatRect.height - draggedElement.offsetHeight;
+                
+                // Apply boundaries
+                draggedElement.style.position = 'absolute';
+                draggedElement.style.left = Math.max(0, Math.min(x, maxX)) + 'px';
+                draggedElement.style.top = Math.max(0, Math.min(y, maxY)) + 'px';
+                draggedElement.style.zIndex = '1000';
+            }
+        }
+        
+        function endDrag(e) {
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                
+                // Reset position if dragged outside of chat area
+                const chatRect = document.getElementById('chatArea').getBoundingClientRect();
+                const messageRect = draggedElement.getBoundingClientRect();
+                
+                if (messageRect.right < chatRect.left || 
+                    messageRect.left > chatRect.right || 
+                    messageRect.bottom < chatRect.top || 
+                    messageRect.top > chatRect.bottom) {
+                    draggedElement.style.position = '';
+                    draggedElement.style.left = '';
+                    draggedElement.style.top = '';
+                }
+                
+                draggedElement = null;
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('mouseup', endDrag);
+            }
+        }
+        
+        // Download functionality
+        function downloadImage() {
+            const phoneFrame = document.getElementById('phoneFrame');
+            
+            html2canvas(phoneFrame, {
+                backgroundColor: '#121214',
+                scale: 2,
+                width: 375,
+                height: 667,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'roblox-chat-' + Date.now() + '.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }).catch(error => {
+                console.error('Error generating image:', error);
+                alert('Error generating image. Please try again.');
+            });
+        }
+        
+        // Initialize with some sample messages
+        messages = [
+            {
+                id: 1,
+                username: 'jerriiiii',
+                text: 'yea?',
+                align: 'left',
+                profilePic: defaultProfilePics.left,
+                image: null
+            },
+            {
+                id: 2,
+                username: 'You',
+                text: 'i didnt know roblox now has',
+                align: 'right',
+                profilePic: defaultProfilePics.right,
+                image: null
+            },
+            {
+                id: 3,
+                username: 'You',
+                text: 'something like this',
+                align: 'right',
+                profilePic: defaultProfilePics.right,
+                image: null
+            },
+            {
+                id: 4,
+                username: 'You',
+                text: 'xD',
+                align: 'right',
+                profilePic: defaultProfilePics.right,
+                image: null
+            }
+        ];
+        
+        renderMessages();
+    </script>
+</body>
+</html>
