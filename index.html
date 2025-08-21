@@ -345,6 +345,10 @@
             <select id="characterSelect">
                 <option value="">Select a character</option>
             </select>
+            <select id="messageAlign">
+                <option value="left">Left (Other user)</option>
+                <option value="right">Right (You)</option>
+            </select>
             <textarea id="messageText" placeholder="Message text" rows="3"></textarea>
             <div class="file-input-wrapper">
                 <input type="file" id="messageImage" class="file-input" accept="image/*">
@@ -384,7 +388,7 @@
         // Default profile pictures
         const defaultProfilePics = {
             left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
-            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTg1NyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
+            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE8MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTg1NyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
         };
         
         // Initialize from localStorage
@@ -522,6 +526,7 @@
         
         function addMessage() {
             const characterId = document.getElementById('characterSelect').value;
+            const align = document.getElementById('messageAlign').value;
             const text = document.getElementById('messageText').value;
             const imageFile = document.getElementById('messageImage').files[0];
             
@@ -546,8 +551,8 @@
                 id: Date.now(),
                 username: character.name,
                 text,
-                align: 'left',
-                profilePic: character.avatar,
+                align,
+                profilePic: align === 'right' ? defaultProfilePics.right : character.avatar,
                 image: null
             };
             
@@ -578,14 +583,17 @@
             const chatArea = document.getElementById('chatArea');
             const messageList = document.getElementById('messageList');
             
-            // Group messages by user
+            // Group messages by user and alignment
             const groupedMessages = [];
             let currentGroup = null;
             
             messages.forEach(message => {
-                if (!currentGroup || currentGroup.username !== message.username) {
+                if (!currentGroup || 
+                    currentGroup.username !== message.username || 
+                    currentGroup.align !== message.align) {
                     currentGroup = {
                         username: message.username,
+                        align: message.align,
                         profilePic: message.profilePic,
                         messages: []
                     };
@@ -598,7 +606,7 @@
             chatArea.innerHTML = '';
             groupedMessages.forEach(group => {
                 const messageGroup = document.createElement('div');
-                messageGroup.className = `message-group ${group.messages[0].align}`;
+                messageGroup.className = `message-group ${group.align}`;
                 
                 const username = document.createElement('div');
                 username.className = 'username';
@@ -608,10 +616,12 @@
                 const groupContent = document.createElement('div');
                 groupContent.className = 'message-group-content';
                 
-                const profilePic = document.createElement('img');
-                profilePic.src = group.profilePic;
-                profilePic.className = 'profile-pic';
-                groupContent.appendChild(profilePic);
+                if (group.align === 'left') {
+                    const profilePic = document.createElement('img');
+                    profilePic.src = group.profilePic;
+                    profilePic.className = 'profile-pic';
+                    groupContent.appendChild(profilePic);
+                }
                 
                 const messageContent = document.createElement('div');
                 messageContent.className = 'message-content';
@@ -637,6 +647,14 @@
                 });
                 
                 groupContent.appendChild(messageContent);
+                
+                if (group.align === 'right') {
+                    const profilePic = document.createElement('img');
+                    profilePic.src = group.profilePic;
+                    profilePic.className = 'profile-pic';
+                    groupContent.appendChild(profilePic);
+                }
+                
                 messageGroup.appendChild(groupContent);
                 chatArea.appendChild(messageGroup);
             });
