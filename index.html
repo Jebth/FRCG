@@ -88,10 +88,22 @@
         .message-group {
             margin-bottom: 20px;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
         
         .message-group.right {
-            text-align: right;
+            align-items: flex-end;
+        }
+        
+        .message-row {
+            display: flex;
+            align-items: flex-start;
+            max-width: 100%;
+        }
+        
+        .message-group.right .message-row {
+            flex-direction: row-reverse;
         }
         
         .profile-pic {
@@ -100,8 +112,7 @@
             border-radius: 50%;
             object-fit: cover;
             margin-right: 8px;
-            vertical-align: top;
-            display: inline-block;
+            flex-shrink: 0;
         }
         
         .message-group.right .profile-pic {
@@ -133,6 +144,7 @@
             font-size: 15px;
             line-height: 1.4;
             position: relative;
+            box-sizing: border-box;
         }
         
         .message-image {
@@ -377,8 +389,8 @@
         
         // Default profile pictures
         const defaultProfilePics = {
-            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTDDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
-            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
+            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw=",
+            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw="
         };
         
         // Header profile picture upload
@@ -620,15 +632,21 @@
                 messageGroup.appendChild(username);
                 
                 group.messages.forEach((msg, index) => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.style.marginBottom = '5px';
+                    const messageRow = document.createElement('div');
+                    messageRow.className = 'message-row';
                     
                     // Only show profile picture for the first message in the group
-                    if (group.align === 'left' && index === 0) {
+                    if (index === 0) {
                         const profilePic = document.createElement('img');
                         profilePic.src = group.profilePic;
                         profilePic.className = 'profile-pic';
-                        messageDiv.appendChild(profilePic);
+                        messageRow.appendChild(profilePic);
+                    } else {
+                        // Add a spacer for alignment when no profile pic is shown
+                        const spacer = document.createElement('div');
+                        spacer.className = 'profile-pic';
+                        spacer.style.visibility = 'hidden';
+                        messageRow.appendChild(spacer);
                     }
                     
                     const messageBubble = document.createElement('div');
@@ -648,17 +666,8 @@
                         messageBubble.appendChild(img);
                     }
                     
-                    messageDiv.appendChild(messageBubble);
-                    
-                    // Only show profile picture for the first message in the group
-                    if (group.align === 'right' && index === 0) {
-                        const profilePic = document.createElement('img');
-                        profilePic.src = group.profilePic;
-                        profilePic.className = 'profile-pic';
-                        messageDiv.appendChild(profilePic);
-                    }
-                    
-                    messageGroup.appendChild(messageDiv);
+                    messageRow.appendChild(messageBubble);
+                    messageGroup.appendChild(messageRow);
                 });
                 
                 chatArea.appendChild(messageGroup);
@@ -705,6 +714,11 @@
             const originalBg = phoneFrame.style.background;
             phoneFrame.style.background = '#121214';
             
+            // Temporarily hide scrollbars for cleaner export
+            const chatArea = document.getElementById('chatArea');
+            const originalOverflow = chatArea.style.overflow;
+            chatArea.style.overflow = 'hidden';
+            
             html2canvas(phoneFrame, {
                 backgroundColor: '#121214',
                 scale: dpr,
@@ -721,8 +735,9 @@
                 windowWidth: 375,
                 windowHeight: 667
             }).then(canvas => {
-                // Restore original background
+                // Restore original styles
                 phoneFrame.style.background = originalBg;
+                chatArea.style.overflow = originalOverflow;
                 
                 const outputCanvas = document.createElement('canvas');
                 const outputCtx = outputCanvas.getContext('2d');
@@ -739,8 +754,9 @@
             }).catch(error => {
                 console.error('Error generating image:', error);
                 alert('Error generating image. Please try again.');
-                // Restore original background in case of error
+                // Restore original styles in case of error
                 phoneFrame.style.background = originalBg;
+                chatArea.style.overflow = originalOverflow;
             });
         }
         
