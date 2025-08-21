@@ -77,8 +77,6 @@
             font-weight: 500;
         }
         
-
-        
         .chat-area {
             height: calc(100% - 70px);
             overflow-y: auto;
@@ -255,7 +253,7 @@
     </style>
 </head>
 <body>
-            <div class="controls">
+    <div class="controls">
         <div class="control-group">
             <h3>Chat Header</h3>
             <input type="text" id="headerName" placeholder="Header name" value="Akaku">
@@ -656,17 +654,36 @@
         function downloadImage() {
             const phoneFrame = document.getElementById('phoneFrame');
             
+            // Get device pixel ratio for crisp images on retina displays
+            const dpr = window.devicePixelRatio || 1;
+            
             html2canvas(phoneFrame, {
                 backgroundColor: '#121214',
-                scale: 2,
+                scale: dpr,
                 width: 375,
                 height: 667,
                 useCORS: true,
-                allowTaint: true
+                allowTaint: true,
+                logging: false,
+                imageTimeout: 0,
+                removeContainer: true,
+                foreignObjectRendering: false,
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: 375,
+                windowHeight: 667
             }).then(canvas => {
+                const outputCanvas = document.createElement('canvas');
+                const outputCtx = outputCanvas.getContext('2d');
+                
+                outputCanvas.width = 375 * dpr;
+                outputCanvas.height = 667 * dpr;
+                
+                outputCtx.drawImage(canvas, 0, 0, 375 * dpr, 667 * dpr);
+                
                 const link = document.createElement('a');
                 link.download = 'roblox-chat-' + Date.now() + '.png';
-                link.href = canvas.toDataURL();
+                link.href = outputCanvas.toDataURL('image/png', 1.0);
                 link.click();
             }).catch(error => {
                 console.error('Error generating image:', error);
@@ -720,158 +737,6 @@
                 renderMessages();
             }
         });
-    </script>.className = 'message';
-                    messageBubble.dataset.messageId = msg.id;
-                    messageBubble.addEventListener('mousedown', startDrag);
-                    
-                    if (msg.text) {
-                        const textSpan = document.createElement('span');
-                        textSpan.textContent = msg.text;
-                        messageBubble.appendChild(textSpan);
-                    }
-                    
-                    if (msg.image) {
-                        const img = document.createElement('img');
-                        img.src = msg.image;
-                        img.className = 'message-image';
-                        messageBubble.appendChild(img);
-                    }
-                    
-                    messageDiv.appendChild(messageBubble);
-                    
-                    if (group.align === 'right') {
-                        const profilePic = document.createElement('img');
-                        profilePic.src = group.profilePic;
-                        profilePic.className = 'profile-pic';
-                        messageDiv.appendChild(profilePic);
-                    }
-                    
-                    messageGroup.appendChild(messageDiv);
-                });
-                
-                chatArea.appendChild(messageGroup);
-            });
-            
-            // Render message list
-            messageList.innerHTML = '';
-            messages.forEach((msg, index) => {
-                const item = document.createElement('div');
-                item.className = 'message-item';
-                item.innerHTML = `
-                    <span>${msg.username}: ${msg.text ? msg.text.substring(0, 20) + (msg.text.length > 20 ? '...' : '') : '[Image]'}</span>
-                    <button class="delete-btn" onclick="deleteMessage(${index})">Delete</button>
-                `;
-                messageList.appendChild(item);
-            });
-        }
-        
-        function deleteMessage(index) {
-            messages.splice(index, 1);
-            renderMessages();
-        }
-        
-        function clearAllMessages() {
-            if (confirm('Are you sure you want to clear all messages?')) {
-                messages = [];
-                renderMessages();
-            }
-        }
-        
-        // Drag functionality
-        function startDrag(e) {
-            draggedElement = e.target;
-            draggedElement.classList.add('dragging');
-            
-            const rect = draggedElement.getBoundingClientRect();
-            dragOffset.x = e.clientX - rect.left;
-            dragOffset.y = e.clientY - rect.top;
-            
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', endDrag);
-            e.preventDefault();
-        }
-        
-        function drag(e) {
-            if (draggedElement) {
-                const chatRect = document.getElementById('chatArea').getBoundingClientRect();
-                const x = e.clientX - chatRect.left - dragOffset.x;
-                const y = e.clientY - chatRect.top - dragOffset.y;
-                
-                draggedElement.style.position = 'absolute';
-                draggedElement.style.left = Math.max(0, Math.min(x, chatRect.width - draggedElement.offsetWidth)) + 'px';
-                draggedElement.style.top = Math.max(0, Math.min(y, chatRect.height - draggedElement.offsetHeight)) + 'px';
-                draggedElement.style.zIndex = '1000';
-            }
-        }
-        
-        function endDrag(e) {
-            if (draggedElement) {
-                draggedElement.classList.remove('dragging');
-                draggedElement = null;
-                document.removeEventListener('mousemove', drag);
-                document.removeEventListener('mouseup', endDrag);
-            }
-        }
-        
-        // Download functionality
-        function downloadImage() {
-            const phoneFrame = document.getElementById('phoneFrame');
-            
-            html2canvas(phoneFrame, {
-                backgroundColor: '#121214',
-                scale: 2,
-                width: 375,
-                height: 667,
-                useCORS: true,
-                allowTaint: true
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'roblox-chat-' + Date.now() + '.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            }).catch(error => {
-                console.error('Error generating image:', error);
-                alert('Error generating image. Please try again.');
-            });
-        }
-        
-        // Initialize with some sample messages
-        messages = [
-            {
-                id: 1,
-                username: 'jerriiiii',
-                text: 'yea?',
-                align: 'left',
-                profilePic: defaultProfilePics.left,
-                image: null
-            },
-            {
-                id: 2,
-                username: 'You',
-                text: 'i didnt know roblox now has',
-                align: 'right',
-                profilePic: defaultProfilePics.right,
-                image: null
-            },
-            {
-                id: 3,
-                username: 'You',
-                text: 'something like this',
-                align: 'right',
-                profilePic: defaultProfilePics.right,
-                image: null
-            },
-            {
-                id: 4,
-                username: 'You',
-                text: 'xD',
-                align: 'right',
-                profilePic: defaultProfilePics.right,
-                image: null
-            }
-        ];
-        
-        renderMessages();
     </script>
 </body>
 </html>
