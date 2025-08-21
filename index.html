@@ -77,6 +77,8 @@
             font-weight: 500;
         }
         
+
+        
         .chat-area {
             height: calc(100% - 70px);
             overflow-y: auto;
@@ -85,23 +87,12 @@
         }
         
         .message-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             position: relative;
-            display: flex;
-            flex-direction: column;
         }
         
         .message-group.right {
-            align-items: flex-end;
-        }
-        
-        .message-group-content {
-            display: flex;
-            max-width: 100%;
-        }
-        
-        .message-group.right .message-group-content {
-            flex-direction: row-reverse;
+            text-align: right;
         }
         
         .profile-pic {
@@ -110,16 +101,12 @@
             border-radius: 50%;
             object-fit: cover;
             margin-right: 8px;
-            align-self: flex-start; /* Changed from flex-end to flex-start to position higher */
-            flex-shrink: 0;
-            margin-top: 5px; /* Added to position higher */
+            vertical-align: top;
         }
         
         .message-group.right .profile-pic {
             margin-right: 0;
             margin-left: 8px;
-            align-self: flex-start; /* Changed from default to position higher */
-            margin-top: 5px; /* Added to position higher */
         }
         
         .username {
@@ -133,11 +120,6 @@
             margin-left: 0;
             margin-right: 40px;
             text-align: right;
-        }
-        
-        .message-content {
-            display: flex;
-            flex-direction: column;
         }
         
         .message {
@@ -254,50 +236,6 @@
             margin-top: 20px;
         }
         
-        .characters-section {
-            border-top: 2px solid #333;
-            padding-top: 20px;
-            margin-top: 20px;
-        }
-        
-        .character-item {
-            padding: 10px;
-            border: 1px solid #555;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            background: #333;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-        }
-        
-        .character-item:hover {
-            background: #444;
-        }
-        
-        .character-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 10px;
-        }
-        
-        .character-info {
-            flex: 1;
-        }
-        
-        .character-name {
-            font-weight: 500;
-        }
-        
-        .character-delete {
-            background: #ff4757;
-            padding: 4px 8px;
-            font-size: 12px;
-            border-radius: 3px;
-        }
-        
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -317,7 +255,7 @@
     </style>
 </head>
 <body>
-    <div class="controls">
+            <div class="controls">
         <div class="control-group">
             <h3>Chat Header</h3>
             <input type="text" id="headerName" placeholder="Header name" value="Akaku">
@@ -327,32 +265,33 @@
             </div>
         </div>
         
-        <div class="control-group characters-section">
-            <h3>CHARACTERS</h3>
-            <div id="charactersList"></div>
-            <button onclick="showAddCharacterForm()">Add New Character</button>
-            
-            <div id="addCharacterForm" style="display: none; margin-top: 10px;">
-                <input type="text" id="characterName" placeholder="Character Name">
-                <div class="file-input-wrapper">
-                    <input type="file" id="characterAvatar" class="file-input" accept="image/*">
-                    <label for="characterAvatar" class="file-input-label">Upload Avatar</label>
-                </div>
-                <button onclick="addCharacter()">Save Character</button>
-                <button onclick="hideAddCharacterForm()">Cancel</button>
+        <div class="control-group">
+            <h3>Saved Characters</h3>
+            <input type="text" id="characterName" placeholder="Character name">
+            <div class="file-input-wrapper">
+                <input type="file" id="characterProfilePic" class="file-input" accept="image/*">
+                <label for="characterProfilePic" class="file-input-label">Upload Character Profile Picture</label>
             </div>
+            <button onclick="saveCharacter()">Save Character</button>
+            <div class="message-list" id="characterList"></div>
+            <button onclick="clearAllCharacters()">Clear All Characters</button>
         </div>
         
         <div class="control-group">
             <h3>Add Message</h3>
             <select id="characterSelect">
-                <option value="">Select a character</option>
+                <option value="">Select saved character or type custom</option>
             </select>
+            <input type="text" id="messageUsername" placeholder="Username" value="jerriiiii">
+            <textarea id="messageText" placeholder="Message text" rows="3"></textarea>
             <select id="messageAlign">
                 <option value="left">Left (Other user)</option>
                 <option value="right">Right (You)</option>
             </select>
-            <textarea id="messageText" placeholder="Message text" rows="3"></textarea>
+            <div class="file-input-wrapper">
+                <input type="file" id="messageProfilePic" class="file-input" accept="image/*">
+                <label for="messageProfilePic" class="file-input-label">Upload Profile Picture (Override)</label>
+            </div>
             <div class="file-input-wrapper">
                 <input type="file" id="messageImage" class="file-input" accept="image/*">
                 <label for="messageImage" class="file-input-label">Upload Message Image</label>
@@ -376,7 +315,7 @@
         <div class="phone-frame" id="phoneFrame">
             <div class="chat-header">
                 <span class="back-arrow">←</span>
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw=" class="header-profile" id="headerProfilePicImg">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==" class="header-profile" id="headerProfilePicImg">
                 <span class="header-name" id="headerNameSpan">Akaku</span>
             </div>
             <div class="chat-area" id="chatArea"></div>
@@ -386,35 +325,51 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         let messages = [];
-        let characters = [];
+        let savedCharacters = [];
+        
+        // Load data from localStorage on page load
+        function loadData() {
+            const savedMessages = localStorage.getItem('roblox-chat-messages');
+            const savedChars = localStorage.getItem('roblox-chat-characters');
+            const savedHeader = localStorage.getItem('roblox-chat-header');
+            
+            if (savedMessages) {
+                messages = JSON.parse(savedMessages);
+            }
+            
+            if (savedChars) {
+                savedCharacters = JSON.parse(savedChars);
+            }
+            
+            if (savedHeader) {
+                const headerData = JSON.parse(savedHeader);
+                document.getElementById('headerName').value = headerData.name;
+                document.getElementById('headerNameSpan').textContent = headerData.name;
+                if (headerData.profilePic) {
+                    document.getElementById('headerProfilePicImg').src = headerData.profilePic;
+                }
+            }
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('roblox-chat-messages', JSON.stringify(messages));
+            localStorage.setItem('roblox-chat-characters', JSON.stringify(savedCharacters));
+        }
+        
+        function saveHeaderData() {
+            const headerData = {
+                name: document.getElementById('headerName').value,
+                profilePic: document.getElementById('headerProfilePicImg').src
+            };
+            localStorage.setItem('roblox-chat-header', JSON.stringify(headerData));
+        }
         
         // Default profile pictures
         const defaultProfilePics = {
-            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTg1NyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
-            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTg1NyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
+            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
+            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
         };
-        
-        // Initialize from localStorage
-        function loadFromStorage() {
-            const savedCharacters = localStorage.getItem('chatCharacters');
-            if (savedCharacters) {
-                characters = JSON.parse(savedCharacters);
-                renderCharacters();
-                updateCharacterSelect();
-            }
-            
-            const savedMessages = localStorage.getItem('chatMessages');
-            if (savedMessages) {
-                messages = JSON.parse(savedMessages);
-                renderMessages();
-            }
-        }
-        
-        // Save to localStorage
-        function saveToStorage() {
-            localStorage.setItem('chatCharacters', JSON.stringify(characters));
-            localStorage.setItem('chatMessages', JSON.stringify(messages));
-        }
         
         // Header profile picture upload
         document.getElementById('headerProfilePic').addEventListener('change', function(e) {
@@ -423,6 +378,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     document.getElementById('headerProfilePicImg').src = e.target.result;
+                    saveHeaderData();
                 };
                 reader.readAsDataURL(file);
             }
@@ -431,155 +387,165 @@
         // Header name update
         document.getElementById('headerName').addEventListener('input', function(e) {
             document.getElementById('headerNameSpan').textContent = e.target.value;
+            saveHeaderData();
         });
         
-        // Character management
-        function showAddCharacterForm() {
-            document.getElementById('addCharacterForm').style.display = 'block';
-        }
+        // Character selection
+        document.getElementById('characterSelect').addEventListener('change', function(e) {
+            const selectedChar = savedCharacters.find(char => char.id == e.target.value);
+            if (selectedChar) {
+                document.getElementById('messageUsername').value = selectedChar.name;
+                // Clear any custom profile pic since we'll use the saved character's pic
+                document.getElementById('messageProfilePic').value = '';
+            }
+        });
         
-        function hideAddCharacterForm() {
-            document.getElementById('addCharacterForm').style.display = 'none';
-            document.getElementById('characterName').value = '';
-            document.getElementById('characterAvatar').value = '';
-        }
-        
-        function addCharacter() {
-            const name = document.getElementById('characterName').value.trim();
-            const avatarFile = document.getElementById('characterAvatar').files[0];
+        function saveCharacter() {
+            const name = document.getElementById('characterName').value;
+            const profilePicFile = document.getElementById('characterProfilePic').files[0];
             
             if (!name) {
                 alert('Please enter a character name');
                 return;
             }
             
-            const character = {
-                id: Date.now(),
-                name,
-                avatar: defaultProfilePics.left
-            };
-            
-            if (avatarFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    character.avatar = e.target.result;
-                    characters.push(character);
-                    saveToStorage();
-                    renderCharacters();
-                    updateCharacterSelect();
-                    hideAddCharacterForm();
-                };
-                reader.readAsDataURL(avatarFile);
-            } else {
-                characters.push(character);
-                saveToStorage();
-                renderCharacters();
-                updateCharacterSelect();
-                hideAddCharacterForm();
+            if (!profilePicFile) {
+                alert('Please upload a profile picture for the character');
+                return;
             }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const character = {
+                    id: Date.now(),
+                    name: name,
+                    profilePic: e.target.result
+                };
+                
+                savedCharacters.push(character);
+                saveData();
+                renderCharacters();
+                clearCharacterInputs();
+            };
+            reader.readAsDataURL(profilePicFile);
         }
         
-        function deleteCharacter(id) {
-            if (confirm('Are you sure you want to delete this character?')) {
-                characters = characters.filter(c => c.id !== id);
-                saveToStorage();
-                renderCharacters();
-                updateCharacterSelect();
-            }
+        function clearCharacterInputs() {
+            document.getElementById('characterName').value = '';
+            document.getElementById('characterProfilePic').value = '';
         }
         
         function renderCharacters() {
-            const charactersList = document.getElementById('charactersList');
-            charactersList.innerHTML = '';
+            const characterList = document.getElementById('characterList');
+            const characterSelect = document.getElementById('characterSelect');
             
-            characters.forEach(character => {
-                const characterEl = document.createElement('div');
-                characterEl.className = 'character-item';
-                characterEl.innerHTML = `
-                    <img src="${character.avatar}" class="character-avatar">
-                    <div class="character-info">
-                        <div class="character-name">${character.name}</div>
-                    </div>
-                    <button class="character-delete" onclick="deleteCharacter(${character.id})">Delete</button>
+            // Update character list
+            characterList.innerHTML = '';
+            savedCharacters.forEach((char, index) => {
+                const item = document.createElement('div');
+                item.className = 'message-item';
+                item.innerHTML = `
+                    <span>${char.name}</span>
+                    <button class="delete-btn" onclick="deleteCharacter(${index})">Delete</button>
                 `;
-                
-                characterEl.addEventListener('click', () => {
-                    selectCharacter(character);
-                });
-                
-                charactersList.appendChild(characterEl);
+                characterList.appendChild(item);
             });
-        }
-        
-        function updateCharacterSelect() {
-            const select = document.getElementById('characterSelect');
-            select.innerHTML = '<option value="">Select a character</option>';
             
-            characters.forEach(character => {
+            // Update character select dropdown
+            characterSelect.innerHTML = '<option value="">Select saved character or type custom</option>';
+            savedCharacters.forEach(char => {
                 const option = document.createElement('option');
-                option.value = character.id;
-                option.textContent = character.name;
-                select.appendChild(option);
+                option.value = char.id;
+                option.textContent = char.name;
+                characterSelect.appendChild(option);
             });
         }
         
-        function selectCharacter(character) {
-            document.getElementById('characterSelect').value = character.id;
+        function deleteCharacter(index) {
+            if (confirm('Are you sure you want to delete this character?')) {
+                savedCharacters.splice(index, 1);
+                saveData();
+                renderCharacters();
+            }
+        }
+        
+        function clearAllCharacters() {
+            if (confirm('Are you sure you want to clear all saved characters?')) {
+                savedCharacters = [];
+                saveData();
+                renderCharacters();
+            }
         }
         
         function addMessage() {
-            const characterId = document.getElementById('characterSelect').value;
-            const align = document.getElementById('messageAlign').value;
+            const selectedCharId = document.getElementById('characterSelect').value;
+            const username = document.getElementById('messageUsername').value || 'User';
             const text = document.getElementById('messageText').value;
+            const align = document.getElementById('messageAlign').value;
+            const profilePicFile = document.getElementById('messageProfilePic').files[0];
             const imageFile = document.getElementById('messageImage').files[0];
-            
-            if (!characterId) {
-                alert('Please select a character');
-                return;
-            }
             
             if (!text && !imageFile) {
                 alert('Please enter message text or upload an image');
                 return;
             }
             
-            const character = characters.find(c => c.id === parseInt(characterId));
-            
-            if (!character) {
-                alert('Selected character not found');
-                return;
-            }
-            
             const message = {
                 id: Date.now(),
-                username: character.name,
+                username,
                 text,
                 align,
-                profilePic: character.avatar, // Always use character avatar
+                profilePic: defaultProfilePics[align],
                 image: null
             };
             
-            if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    message.image = e.target.result;
-                    messages.push(message);
-                    saveToStorage();
-                    renderMessages();
-                    clearMessageInputs();
-                };
-                reader.readAsDataURL(imageFile);
-            } else {
-                messages.push(message);
-                saveToStorage();
-                renderMessages();
-                clearMessageInputs();
+            // Use saved character's profile pic if selected and no override provided
+            if (selectedCharId && !profilePicFile) {
+                const selectedChar = savedCharacters.find(char => char.id == selectedCharId);
+                if (selectedChar) {
+                    message.profilePic = selectedChar.profilePic;
+                }
             }
+            
+            const promises = [];
+            
+            // Handle profile picture override
+            if (profilePicFile) {
+                promises.push(new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        message.profilePic = e.target.result;
+                        resolve();
+                    };
+                    reader.readAsDataURL(profilePicFile);
+                }));
+            }
+            
+            // Handle message image
+            if (imageFile) {
+                promises.push(new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        message.image = e.target.result;
+                        resolve();
+                    };
+                    reader.readAsDataURL(imageFile);
+                }));
+            }
+            
+            Promise.all(promises).then(() => {
+                messages.push(message);
+                saveData();
+                renderMessages();
+                clearInputs();
+            });
         }
         
-        function clearMessageInputs() {
+        function clearInputs() {
             document.getElementById('messageText').value = '';
+            document.getElementById('messageProfilePic').value = '';
             document.getElementById('messageImage').value = '';
+            document.getElementById('characterSelect').value = '';
         }
         
         function renderMessages() {
@@ -616,22 +582,20 @@
                 username.textContent = group.username;
                 messageGroup.appendChild(username);
                 
-                const groupContent = document.createElement('div');
-                groupContent.className = 'message-group-content';
-                
-                if (group.align === 'left') {
-                    const profilePic = document.createElement('img');
-                    profilePic.src = group.profilePic;
-                    profilePic.className = 'profile-pic';
-                    groupContent.appendChild(profilePic);
-                }
-                
-                const messageContent = document.createElement('div');
-                messageContent.className = 'message-content';
-                
                 group.messages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.style.marginBottom = '5px';
+                    
+                    if (group.align === 'left') {
+                        const profilePic = document.createElement('img');
+                        profilePic.src = group.profilePic;
+                        profilePic.className = 'profile-pic';
+                        messageDiv.appendChild(profilePic);
+                    }
+                    
                     const messageBubble = document.createElement('div');
                     messageBubble.className = 'message';
+                    messageBubble.dataset.messageId = msg.id;
                     
                     if (msg.text) {
                         const textSpan = document.createElement('span');
@@ -646,24 +610,20 @@
                         messageBubble.appendChild(img);
                     }
                     
-                    messageContent.appendChild(messageBubble);
+                    messageDiv.appendChild(messageBubble);
+                    
+                    if (group.align === 'right') {
+                        const profilePic = document.createElement('img');
+                        profilePic.src = group.profilePic;
+                        profilePic.className = 'profile-pic';
+                        messageDiv.appendChild(profilePic);
+                    }
+                    
+                    messageGroup.appendChild(messageDiv);
                 });
                 
-                groupContent.appendChild(messageContent);
-                
-                if (group.align === 'right') {
-                    const profilePic = document.createElement('img');
-                    profilePic.src = group.profilePic;
-                    profilePic.className = 'profile-pic';
-                    groupContent.appendChild(profilePic);
-                }
-                
-                messageGroup.appendChild(groupContent);
                 chatArea.appendChild(messageGroup);
             });
-            
-            // Scroll to bottom
-            chatArea.scrollTop = chatArea.scrollHeight;
             
             // Render message list
             messageList.innerHTML = '';
@@ -671,7 +631,7 @@
                 const item = document.createElement('div');
                 item.className = 'message-item';
                 item.innerHTML = `
-                    <span>${msg.username}: ${msg.text ? msg.text.substring(0, 20) + (msg.text.length > 20 ? '...' : '') : '[Image]'}</span>
+                    <span>[${msg.align.toUpperCase()}] ${msg.username}: ${msg.text ? msg.text.substring(0, 20) + (msg.text.length > 20 ? '...' : '') : '[Image]'}</span>
                     <button class="delete-btn" onclick="deleteMessage(${index})">Delete</button>
                 `;
                 messageList.appendChild(item);
@@ -680,14 +640,14 @@
         
         function deleteMessage(index) {
             messages.splice(index, 1);
-            saveToStorage();
+            saveData();
             renderMessages();
         }
         
         function clearAllMessages() {
             if (confirm('Are you sure you want to clear all messages?')) {
                 messages = [];
-                saveToStorage();
+                saveData();
                 renderMessages();
             }
         }
@@ -714,31 +674,13 @@
             });
         }
         
-        // Initialize with some sample data
-        window.onload = function() {
-            // Load from storage or initialize with defaults
-            loadFromStorage();
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            renderCharacters();
+            renderMessages();
             
-            // Add default characters if none exist
-            if (characters.length === 0) {
-                characters = [
-                    {
-                        id: 1,
-                        name: 'jerriiiii',
-                        avatar: defaultProfilePics.left
-                    },
-                    {
-                        id: 2,
-                        name: 'You',
-                        avatar: defaultProfilePics.right
-                    }
-                ];
-                saveToStorage();
-                renderCharacters();
-                updateCharacterSelect();
-            }
-            
-            // Add sample messages if none exist
+            // If no messages exist, add some sample messages
             if (messages.length === 0) {
                 messages = [
                     {
@@ -774,10 +716,162 @@
                         image: null
                     }
                 ];
-                saveToStorage();
+                saveData();
                 renderMessages();
             }
-        };
+        });
+    </script>.className = 'message';
+                    messageBubble.dataset.messageId = msg.id;
+                    messageBubble.addEventListener('mousedown', startDrag);
+                    
+                    if (msg.text) {
+                        const textSpan = document.createElement('span');
+                        textSpan.textContent = msg.text;
+                        messageBubble.appendChild(textSpan);
+                    }
+                    
+                    if (msg.image) {
+                        const img = document.createElement('img');
+                        img.src = msg.image;
+                        img.className = 'message-image';
+                        messageBubble.appendChild(img);
+                    }
+                    
+                    messageDiv.appendChild(messageBubble);
+                    
+                    if (group.align === 'right') {
+                        const profilePic = document.createElement('img');
+                        profilePic.src = group.profilePic;
+                        profilePic.className = 'profile-pic';
+                        messageDiv.appendChild(profilePic);
+                    }
+                    
+                    messageGroup.appendChild(messageDiv);
+                });
+                
+                chatArea.appendChild(messageGroup);
+            });
+            
+            // Render message list
+            messageList.innerHTML = '';
+            messages.forEach((msg, index) => {
+                const item = document.createElement('div');
+                item.className = 'message-item';
+                item.innerHTML = `
+                    <span>${msg.username}: ${msg.text ? msg.text.substring(0, 20) + (msg.text.length > 20 ? '...' : '') : '[Image]'}</span>
+                    <button class="delete-btn" onclick="deleteMessage(${index})">Delete</button>
+                `;
+                messageList.appendChild(item);
+            });
+        }
+        
+        function deleteMessage(index) {
+            messages.splice(index, 1);
+            renderMessages();
+        }
+        
+        function clearAllMessages() {
+            if (confirm('Are you sure you want to clear all messages?')) {
+                messages = [];
+                renderMessages();
+            }
+        }
+        
+        // Drag functionality
+        function startDrag(e) {
+            draggedElement = e.target;
+            draggedElement.classList.add('dragging');
+            
+            const rect = draggedElement.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+            e.preventDefault();
+        }
+        
+        function drag(e) {
+            if (draggedElement) {
+                const chatRect = document.getElementById('chatArea').getBoundingClientRect();
+                const x = e.clientX - chatRect.left - dragOffset.x;
+                const y = e.clientY - chatRect.top - dragOffset.y;
+                
+                draggedElement.style.position = 'absolute';
+                draggedElement.style.left = Math.max(0, Math.min(x, chatRect.width - draggedElement.offsetWidth)) + 'px';
+                draggedElement.style.top = Math.max(0, Math.min(y, chatRect.height - draggedElement.offsetHeight)) + 'px';
+                draggedElement.style.zIndex = '1000';
+            }
+        }
+        
+        function endDrag(e) {
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                draggedElement = null;
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('mouseup', endDrag);
+            }
+        }
+        
+        // Download functionality
+        function downloadImage() {
+            const phoneFrame = document.getElementById('phoneFrame');
+            
+            html2canvas(phoneFrame, {
+                backgroundColor: '#121214',
+                scale: 2,
+                width: 375,
+                height: 667,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'roblox-chat-' + Date.now() + '.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }).catch(error => {
+                console.error('Error generating image:', error);
+                alert('Error generating image. Please try again.');
+            });
+        }
+        
+        // Initialize with some sample messages
+        messages = [
+            {
+                id: 1,
+                username: 'jerriiiii',
+                text: 'yea?',
+                align: 'left',
+                profilePic: defaultProfilePics.left,
+                image: null
+            },
+            {
+                id: 2,
+                username: 'You',
+                text: 'i didnt know roblox now has',
+                align: 'right',
+                profilePic: defaultProfilePics.right,
+                image: null
+            },
+            {
+                id: 3,
+                username: 'You',
+                text: 'something like this',
+                align: 'right',
+                profilePic: defaultProfilePics.right,
+                image: null
+            },
+            {
+                id: 4,
+                username: 'You',
+                text: 'xD',
+                align: 'right',
+                profilePic: defaultProfilePics.right,
+                image: null
+            }
+        ];
+        
+        renderMessages();
     </script>
 </body>
 </html>
