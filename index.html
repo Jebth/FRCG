@@ -19,26 +19,14 @@
             color: white;
             display: flex;
             min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            display: flex;
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            gap: 20px;
-            background: #252525;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
         }
         
         .controls {
             width: 350px;
             background: #2a2a2a;
-            padding: 25px;
+            padding: 20px;
             overflow-y: auto;
+            border-right: 2px solid #333;
         }
         
         .preview-container {
@@ -46,24 +34,23 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #1e1e1e;
-            padding: 30px;
+            background: #1a1a1a;
+            padding: 20px;
         }
         
         .phone-frame {
             width: 375px;
             height: 667px;
             background: #121214;
-            border-radius: 40px;
+            border-radius: 25px;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
-            border: 4px solid #3a3a3a;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
         
         .chat-header {
-            background: #232327;
-            padding: 18px 20px;
+            background: #121214;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
             border-bottom: 1px solid #333;
@@ -72,32 +59,28 @@
         }
         
         .back-arrow {
-            font-size: 24px;
+            font-size: 20px;
             margin-right: 15px;
             cursor: pointer;
-            color: #00a2ff;
         }
         
         .header-profile {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
-            margin-right: 15px;
+            margin-right: 12px;
             object-fit: cover;
-            border: 2px solid #4a9eff;
         }
         
         .header-name {
             font-size: 18px;
-            font-weight: 600;
-            color: #f0f0f0;
+            font-weight: 500;
         }
         
         .chat-area {
-            height: calc(100% - 76px);
+            height: calc(100% - 70px);
             overflow-y: auto;
             padding: 20px;
-            background: #121214;
             position: relative;
         }
         
@@ -111,54 +94,50 @@
         }
         
         .profile-pic {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             object-fit: cover;
-            margin-right: 10px;
+            margin-right: 8px;
             vertical-align: top;
-            border: 2px solid #444;
         }
         
         .message-group.right .profile-pic {
             margin-right: 0;
-            margin-left: 10px;
+            margin-left: 8px;
         }
         
         .username {
             font-size: 13px;
             color: #aaa;
             margin-bottom: 5px;
-            margin-left: 46px;
-            font-weight: 500;
+            margin-left: 40px;
         }
         
         .message-group.right .username {
             margin-left: 0;
-            margin-right: 46px;
+            margin-right: 40px;
             text-align: right;
         }
         
         .message {
             display: inline-block;
             background: #313139;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 18px;
             max-width: 250px;
             word-wrap: break-word;
-            margin: 4px 0;
+            margin: 2px 0;
             font-size: 15px;
             line-height: 1.4;
             position: relative;
             cursor: move;
-            transition: transform 0.2s, opacity 0.2s;
         }
         
         .message.dragging {
-            opacity: 0.8;
-            transform: scale(1.03);
+            opacity: 0.7;
+            transform: scale(1.05);
             z-index: 1000;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
         .message-image {
@@ -167,104 +146,75 @@
             border-radius: 12px;
             display: block;
             margin: 5px 0;
-            border: 1px solid #444;
         }
         
         .control-group {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #3a3a3a;
+            margin-bottom: 20px;
         }
         
         .control-group h3 {
-            color: #4a9eff;
-            margin-bottom: 12px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .control-group h3::before {
-            content: "•";
-            color: #4a9eff;
-            font-size: 24px;
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 16px;
         }
         
         input, textarea, select {
             width: 100%;
-            padding: 12px;
-            margin: 6px 0;
-            border: 1px solid #444;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #555;
             background: #333;
             color: white;
-            border-radius: 8px;
+            border-radius: 5px;
             font-family: inherit;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus, textarea:focus, select:focus {
-            border-color: #4a9eff;
-            outline: none;
         }
         
         button {
             background: #4a9eff;
             color: white;
             border: none;
-            padding: 12px 18px;
-            border-radius: 8px;
+            padding: 10px 15px;
+            border-radius: 5px;
             cursor: pointer;
-            margin: 8px 8px 8px 0;
+            margin: 5px 5px 5px 0;
             font-family: inherit;
-            font-weight: 500;
-            transition: background 0.3s, transform 0.2s;
         }
         
         button:hover {
             background: #3a8eef;
-            transform: translateY(-2px);
         }
         
         .message-list {
             max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #444;
+            border: 1px solid #555;
             background: #333;
-            border-radius: 8px;
-            margin-top: 10px;
+            border-radius: 5px;
         }
         
         .message-item {
-            padding: 10px;
-            border-bottom: 1px solid #444;
+            padding: 8px;
+            border-bottom: 1px solid #555;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background 0.2s;
         }
         
         .message-item:hover {
-            background: #3a3a3a;
+            background: #444;
         }
         
         .delete-btn {
             background: #ff4757;
-            padding: 5px 10px;
+            padding: 4px 8px;
             font-size: 12px;
-            border-radius: 5px;
-        }
-        
-        .delete-btn:hover {
-            background: #ee3646;
         }
         
         .file-input-wrapper {
             position: relative;
             display: inline-block;
             width: 100%;
-            margin: 8px 0;
         }
         
         .file-input {
@@ -273,126 +223,92 @@
         
         .file-input-label {
             display: block;
-            padding: 12px;
-            background: #444;
-            border-radius: 8px;
+            padding: 10px;
+            background: #555;
+            border-radius: 5px;
             text-align: center;
             cursor: pointer;
-            transition: background 0.3s;
-            font-weight: 500;
+            margin: 5px 0;
         }
         
         .file-input-label:hover {
-            background: #4a4a4a;
+            background: #666;
         }
         
         .export-section {
-            border-top: 2px solid #3a3a3a;
+            border-top: 2px solid #333;
             padding-top: 20px;
             margin-top: 20px;
         }
         
-        .instructions {
-            background: #333;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        
-        .instructions h4 {
-            color: #4a9eff;
-            margin-bottom: 8px;
-        }
-        
-        .instructions ul {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 5px;
-        }
-        
-        @media (max-width: 900px) {
-            .container {
+        @media (max-width: 768px) {
+            body {
                 flex-direction: column;
-                height: auto;
             }
             .controls {
                 width: 100%;
-                max-height: 400px;
+                height: 300px;
             }
             .preview-container {
-                width: 100%;
-                padding: 20px;
+                height: calc(100vh - 300px);
+            }
+            .phone-frame {
+                width: 90%;
+                max-width: 375px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="controls">
-            <div class="control-group">
-                <h3>Chat Header</h3>
-                <input type="text" id="headerName" placeholder="Header name" value="Akaku">
-                <div class="file-input-wrapper">
-                    <input type="file" id="headerProfilePic" class="file-input" accept="image/*">
-                    <label for="headerProfilePic" class="file-input-label">Upload Header Profile Picture</label>
-                </div>
-            </div>
-            
-            <div class="control-group">
-                <h3>Add Message</h3>
-                <input type="text" id="messageUsername" placeholder="Username" value="jerriiiii">
-                <textarea id="messageText" placeholder="Message text" rows="3"></textarea>
-                <select id="messageAlign">
-                    <option value="left">Left (Other user)</option>
-                    <option value="right">Right (You)</option>
-                </select>
-                <div class="file-input-wrapper">
-                    <input type="file" id="messageProfilePic" class="file-input" accept="image/*">
-                    <label for="messageProfilePic" class="file-input-label">Upload Profile Picture</label>
-                </div>
-                <div class="file-input-wrapper">
-                    <input type="file" id="messageImage" class="file-input" accept="image/*">
-                    <label for="messageImage" class="file-input-label">Upload Message Image</label>
-                </div>
-                <button onclick="addMessage()">Add Message</button>
-            </div>
-            
-            <div class="control-group">
-                <h3>Message List</h3>
-                <div class="message-list" id="messageList"></div>
-                <button onclick="clearAllMessages()">Clear All Messages</button>
-            </div>
-            
-            <div class="control-group export-section">
-                <h3>Export</h3>
-                <button onclick="downloadImage()">Download as PNG</button>
-            </div>
-            
-            <div class="instructions">
-                <h4>How to Use</h4>
-                <ul>
-                    <li>Set the chat header name and image</li>
-                    <li>Add messages with username, text, and alignment</li>
-                    <li>Upload profile pictures and message images</li>
-                    <li>Drag messages to reposition them in the chat</li>
-                    <li>Download the final result as a PNG image</li>
-                </ul>
+    <div class="controls">
+        <div class="control-group">
+            <h3>Chat Header</h3>
+            <input type="text" id="headerName" placeholder="Header name" value="Akaku">
+            <div class="file-input-wrapper">
+                <input type="file" id="headerProfilePic" class="file-input" accept="image/*">
+                <label for="headerProfilePic" class="file-input-label">Upload Header Profile Picture</label>
             </div>
         </div>
         
-        <div class="preview-container">
-            <div class="phone-frame" id="phoneFrame">
-                <div class="chat-header">
-                    <span class="back-arrow">←</span>
-                    <img src="https://via.placeholder.com/40x40/4a4a4a/4a4a4a?text=A" class="header-profile" id="headerProfilePicImg">
-                    <span class="header-name" id="headerNameSpan">Akaku</span>
-                </div>
-                <div class="chat-area" id="chatArea"></div>
+        <div class="control-group">
+            <h3>Add Message</h3>
+            <input type="text" id="messageUsername" placeholder="Username" value="jerriiiii">
+            <textarea id="messageText" placeholder="Message text" rows="3"></textarea>
+            <select id="messageAlign">
+                <option value="left">Left (Other user)</option>
+                <option value="right">Right (You)</option>
+            </select>
+            <div class="file-input-wrapper">
+                <input type="file" id="messageProfilePic" class="file-input" accept="image/*">
+                <label for="messageProfilePic" class="file-input-label">Upload Profile Picture</label>
             </div>
+            <div class="file-input-wrapper">
+                <input type="file" id="messageImage" class="file-input" accept="image/*">
+                <label for="messageImage" class="file-input-label">Upload Message Image</label>
+            </div>
+            <button onclick="addMessage()">Add Message</button>
+        </div>
+        
+        <div class="control-group">
+            <h3>Message List</h3>
+            <div class="message-list" id="messageList"></div>
+            <button onclick="clearAllMessages()">Clear All Messages</button>
+        </div>
+        
+        <div class="control-group export-section">
+            <h3>Export</h3>
+            <button onclick="downloadImage()">Download as PNG</button>
+        </div>
+    </div>
+    
+    <div class="preview-container">
+        <div class="phone-frame" id="phoneFrame">
+            <div class="chat-header">
+                <span class="back-arrow">←</span>
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==" class="header-profile" id="headerProfilePicImg">
+                <span class="header-name" id="headerNameSpan">Akaku</span>
+            </div>
+            <div class="chat-area" id="chatArea"></div>
         </div>
     </div>
 
@@ -401,11 +317,12 @@
         let messages = [];
         let draggedElement = null;
         let dragOffset = { x: 0, y: 0 };
+        let originalPosition = { x: 0, y: 0 };
         
-        // Fixed profile pictures - using placeholder images instead of broken SVG
+        // Default profile pictures
         const defaultProfilePics = {
-            left: "https://via.placeholder.com/36x36/666666/ffffff?text=J",
-            right: "https://via.placeholder.com/36x36/4a9eff/ffffff?text=Y"
+            left: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==",
+            right: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0YTllZmYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzMzN2FiNyIvPgo8L3N2Zz4KPC9zdmc+Cg=="
         };
         
         // Header profile picture upload
@@ -522,6 +439,7 @@
                 group.messages.forEach(msg => {
                     const messageDiv = document.createElement('div');
                     messageDiv.style.marginBottom = '5px';
+                    messageDiv.style.position = 'relative';
                     
                     if (group.align === 'left') {
                         const profilePic = document.createElement('img');
@@ -574,9 +492,6 @@
                 `;
                 messageList.appendChild(item);
             });
-            
-            // Scroll to bottom of chat
-            chatArea.scrollTop = chatArea.scrollHeight;
         }
         
         function deleteMessage(index) {
@@ -597,6 +512,11 @@
                 draggedElement = e.target;
                 draggedElement.classList.add('dragging');
                 
+                // Store original position
+                const parentDiv = draggedElement.parentElement;
+                originalPosition.x = parentDiv.offsetLeft;
+                originalPosition.y = parentDiv.offsetTop;
+                
                 const rect = draggedElement.getBoundingClientRect();
                 dragOffset.x = e.clientX - rect.left;
                 dragOffset.y = e.clientY - rect.top;
@@ -613,10 +533,11 @@
                 const x = e.clientX - chatRect.left - dragOffset.x;
                 const y = e.clientY - chatRect.top - dragOffset.y;
                 
-                // Calculate boundaries to keep within chat area
+                // Calculate boundaries
                 const maxX = chatRect.width - draggedElement.offsetWidth;
                 const maxY = chatRect.height - draggedElement.offsetHeight;
                 
+                // Apply boundaries
                 draggedElement.style.position = 'absolute';
                 draggedElement.style.left = Math.max(0, Math.min(x, maxX)) + 'px';
                 draggedElement.style.top = Math.max(0, Math.min(y, maxY)) + 'px';
@@ -627,6 +548,20 @@
         function endDrag(e) {
             if (draggedElement) {
                 draggedElement.classList.remove('dragging');
+                
+                // Reset position if dragged outside of chat area
+                const chatRect = document.getElementById('chatArea').getBoundingClientRect();
+                const messageRect = draggedElement.getBoundingClientRect();
+                
+                if (messageRect.right < chatRect.left || 
+                    messageRect.left > chatRect.right || 
+                    messageRect.bottom < chatRect.top || 
+                    messageRect.top > chatRect.bottom) {
+                    draggedElement.style.position = '';
+                    draggedElement.style.left = '';
+                    draggedElement.style.top = '';
+                }
+                
                 draggedElement = null;
                 document.removeEventListener('mousemove', drag);
                 document.removeEventListener('mouseup', endDrag);
@@ -642,7 +577,8 @@
                 scale: 2,
                 width: 375,
                 height: 667,
-                useCORS: true
+                useCORS: true,
+                allowTaint: true
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'roblox-chat-' + Date.now() + '.png';
