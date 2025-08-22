@@ -59,8 +59,12 @@
     .back-arrow { font-size:20px; margin-right:15px; cursor:pointer; }
 
     .header-profile {
-      width:35px; height:35px; border-radius:50%; margin-right:12px; object-fit:cover;
-      background-color: #A3A3A5; /* Chat header profile background */
+      width:35px; height:35px; border-radius:50%; margin-right:12px; object-fit:cover; position:relative;
+      display:inline-block;
+    }
+
+    .header-profile-bg {
+      width:35px; height:35px; border-radius:50%; background:#A3A3A5; display:inline-block; position:absolute; left:0; top:0; z-index:-1;
     }
 
     .header-name { font-size:18px; font-weight:500; }
@@ -92,11 +96,15 @@
     }
     .message-group.right .message-row { flex-direction:row-reverse; }
 
-    .profile-pic {
-      width:32px; height:32px; border-radius:50%; object-fit:cover; margin-right:8px; flex-shrink:0;
-      background-color: #D0D8FC; /* Chat message profile background */
+    .profile-pic-wrap {
+      width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-right:8px; flex-shrink:0; position:relative;
+      background:#D0D8FC; /* chat background */
     }
-    .message-group.right .profile-pic { margin-right:0; margin-left:8px; }
+    .message-group.right .profile-pic-wrap { margin-right:0; margin-left:8px; }
+
+    .profile-pic {
+      width:32px; height:32px; border-radius:50%; object-fit:cover; z-index:2;
+    }
 
     .username {
       font-size:13px; color:#aaa; margin-bottom:5px; margin-left:40px;
@@ -115,10 +123,13 @@
       line-height:1.4;
       position:relative;
       box-sizing:border-box;
+      cursor:pointer;
+      user-select:text;
     }
 
     .message-image {
-      max-width:200px; max-height:200px; border-radius:12px; display:block; margin:5px 0;
+      max-width:200px; max-height:200px; border-radius:12px; display:block; margin:5px 0; width:auto;
+      object-fit:cover;
     }
 
     .control-group { margin-bottom:20px; }
@@ -133,6 +144,7 @@
       background:#4a9eff; color:white; border:none; padding:10px 15px;
       border-radius:5px; cursor:pointer; margin:5px 5px 5px 0; font-family:inherit;
     }
+    button[disabled] { opacity:0.6; cursor:not-allowed; }
     button:hover { background:#3a8eef; }
 
     .message-list {
@@ -174,105 +186,6 @@
       width:375px;
     }
 
-    /* Modal styles */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      display: none;
-    }
-
-    .modal {
-      background: #2a2a2a;
-      border-radius: 10px;
-      padding: 20px;
-      width: 90%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .modal-preview {
-      margin: 15px 0;
-      padding: 10px;
-      background: #1a1a1a;
-      border-radius: 8px;
-    }
-
-    /* Loading screen */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      display: none;
-    }
-
-    .loading-spinner {
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Draggable messages */
-    .draggable {
-      cursor: move;
-    }
-
-    .dragging {
-      opacity: 0.5;
-    }
-
-    /* Image placeholder */
-    .image-placeholder {
-      color: #4a9eff;
-      cursor: pointer;
-      font-style: italic;
-    }
-
-    /* Resizable image */
-    .resizable-image {
-      resize: both;
-      overflow: hidden;
-      min-width: 100px;
-      min-height: 100px;
-      max-width: 300px;
-      max-height: 300px;
-    }
-
     @media (max-width:768px){
       body { flex-direction:column; }
       .controls { width:100%; height:300px; }
@@ -280,6 +193,33 @@
       .phone-frame { width:90%; max-width:375px; }
       .page-controls { width:90%; max-width:375px; }
     }
+
+    /* Loader (prevent spamming) */
+    .loader {
+      position:fixed; left:0; top:0; right:0; bottom:0; display:none;
+      background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:9999;
+    }
+    .loader.active { display:flex; }
+    @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+    .loader svg { width:100px; height:100px; animation:spin 1.2s linear infinite; fill:#1446FF; }
+
+    /* Modal */
+    .modal-overlay { position:fixed; left:0; top:0; right:0; bottom:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:10000; }
+    .modal-overlay.active { display:flex; }
+    .modal { background:#1f1f1f; padding:18px; width:420px; max-width:95%; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.6); }
+    .modal h3 { margin-bottom:10px; }
+    .modal .row { margin-bottom:10px; }
+    .modal .img-preview { max-width:100%; max-height:220px; display:block; margin-top:8px; border-radius:8px; }
+    .modal .small { font-size:13px; color:#bbb; }
+
+    /* Drag handle */
+    .drag-handle { cursor:grab; margin-right:10px; opacity:0.8; }
+
+    /* placeholder style for draggable over */
+    .drag-over { background:#3a3a3a !important; }
+
+    /* small icon buttons inline */
+    .icon-btn { background:#666; padding:6px 8px; border-radius:6px; margin-left:6px; font-size:13px; }
   </style>
 </head>
 <body>
@@ -287,6 +227,9 @@
     <div class="control-group">
       <h3>Chat Header</h3>
       <input type="text" id="headerName" placeholder="Header name" value="Akaku"/>
+      <div style="position:relative; display:inline-block;">
+        <div class="header-profile-bg" style="display:none; position:absolute; left:0; top:0;"></div>
+      </div>
       <div class="file-input-wrapper">
         <input type="file" id="headerProfilePic" class="file-input" accept="image/*"/>
         <label for="headerProfilePic" class="file-input-label">Upload Header Profile Picture</label>
@@ -312,11 +255,13 @@
 Character 1: hey
 Character 2: sup?
 Character 1: nothing much"></textarea>
+
       <div class="checkbox-group">
-        <input type="checkbox" id="useEmojis" checked />
-        <label for="useEmojis">Add Emojis (AI)</label>
+        <input type="checkbox" id="allowEmojis" checked/>
+        <label for="allowEmojis">Allow Emojis in automated messages</label>
       </div>
-      <button onclick="automateConversation()">Automate → Add to Message List</button>
+
+      <button id="automateBtn" onclick="automateConversation()">Automate → Add to Message List</button>
     </div>
 
     <div class="control-group">
@@ -368,9 +313,12 @@ Character 1: nothing much"></textarea>
     <div class="phone-frame" id="phoneFrame">
       <div class="chat-header">
         <span class="back-arrow">←</span>
-        <img id="headerProfilePicImg"
-             class="header-profile"
-             src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz48L3N2Zz4="/>
+        <div style="position:relative; width:35px; height:35px;">
+          <div class="header-profile-bg" style="position:absolute; left:0; top:0; width:35px; height:35px; border-radius:50%; background:#A3A3A5;"></div>
+          <img id="headerProfilePicImg"
+               class="header-profile"
+               src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz48L3N2Zz4="/>
+        </div>
         <span class="header-name" id="headerNameSpan">Akaku</span>
       </div>
       <div class="chat-area" id="chatArea"></div>
@@ -380,32 +328,58 @@ Character 1: nothing much"></textarea>
     <div class="pages-container" id="pagesContainer"></div>
   </div>
 
-  <!-- Modal for editing -->
-  <div class="modal-overlay" id="editModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Edit Message</h3>
-        <button class="modal-close" onclick="closeModal()">&times;</button>
-      </div>
-      <div class="modal-preview" id="modalPreview"></div>
-      <div class="control-group">
-        <textarea id="modalMessageText" placeholder="Message text" rows="3"></textarea>
-        <div class="file-input-wrapper">
-          <input type="file" id="modalMessageImage" class="file-input" accept="image/*"/>
-          <label for="modalMessageImage" class="file-input-label">Change Message Image</label>
-        </div>
-        <button onclick="saveModalChanges()">Save Changes</button>
-        <button onclick="closeModal()">Cancel</button>
-      </div>
-    </div>
+  <!-- Loader overlay (prevents spamming) -->
+  <div id="loader" class="loader" role="status" aria-hidden="true">
+    <!-- Your R SVG spinning in vivid blue #1446FF -->
+    <svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="m 7.7045134,12.849616 c -0.12125,-0.2182 -0.83621,-1.5326 -1.2164,-2.2363 -0.30786,-0.5698 -0.65918,-1.2154996 -0.83517,-1.5347996 -0.0415,-0.075 -0.0816,-0.1346 -0.0893,-0.1318 -0.0482,0.017 0.0147,0.2513 0.36132,1.3457996 0.17208,0.5435 0.28136,0.9068 0.32218,1.0713 0.0245,0.099 0.0285,0.1444 0.0282,0.3207 -3.3e-4,0.201 -0.0274,0.4271 -0.0552,0.4613 -0.006,0.01 -0.0231,0.012 -0.0381,0.01 -0.33991,-0.05 -1.05936,-0.199 -3.04403,-0.6307 -0.104,-0.023 -0.14988,-0.038 -0.15389,-0.051 -0.0118,-0.039 -1.15775,-5.4372996 -1.47252,-6.9364996 -0.135,-0.643 -0.42557,-2.0441 -0.43839,-2.1138 -0.007,-0.036 -0.005,-0.038 0.0378,-0.045 0.0627,-0.01 1.08294,-0.141 2.27802,-0.2926 0.55589,-0.07 1.17956,-0.1497 1.38593,-0.176 0.20638,-0.026 1.11057,-0.1405 2.0093,-0.2538 1.58362,-0.1998 3.5388506,-0.4481 3.9096706,-0.4965 0.86095,-0.1125 1.22192,-0.1573 1.28861,-0.1599 l 0.0782,0 0.0583,0.4237 c 0.0321,0.233 0.13415,0.971 0.22688,1.6401 0.34992,2.5247 0.53032,3.8993 0.57594,4.3883 l 0.008,0.085 -0.313,0.2426 c -0.39577,0.3067 -0.82747,0.6371 -1.07056,0.8193 l -0.18866,0.1415 -0.10184,0 c -0.21583,-10e-5 -0.81673,-0.033 -1.8811606,-0.1037 -0.6868,-0.045 -1.03543,-0.057 -1.04327,-0.034 -0.008,0.024 0.68396,0.6313 3.0041506,2.6358996 l 0.73836,0.638 0.1378,0.2748 c 0.15782,0.3149 0.20273,0.4234 0.18322,0.4429 -0.0177,0.018 -3.5023606,0.3355 -4.2609406,0.3886 -0.38845,0.027 -0.33282,0.044 -0.42946,-0.1299 z m -2.19857,-6.0306996 c 0.48603,-0.089 1.74243,-0.3434 2.12774,-0.4308 l 0.1712,-0.039 0.005,-0.044 c 0.0118,-0.095 -0.0234,-0.9543 -0.0519,-1.2663 -0.015,-0.165 -0.022,-0.1997 -0.04,-0.1998 -0.008,-1e-4 -0.14489,-0.019 -0.30467,-0.042 -0.15977,-0.023 -0.48114,-0.067 -0.71414,-0.098 -0.23301,-0.031 -0.62246,-0.082 -0.86546,-0.1144 -0.7463,-0.099 -1.08752,-0.1395 -1.09662,-0.1304 -0.0168,0.017 -0.0276,0.4331 -0.0283,1.0935 l -7.3e-4,0.6671 0.19224,0.2553 c 0.26144,0.3472 0.29857,0.3896 0.34125,0.3896 0.0188,0 0.13764,-0.019 0.26398,-0.042 z"/>
+    </svg>
   </div>
 
-  <!-- Loading screen -->
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner">
-      <svg fill="#1446FF" width="60px" height="60px" viewBox="0 0 14 14" role="img" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-        <path d="m 7.7045134,12.849616 c -0.12125,-0.2182 -0.83621,-1.5326 -0.12164,-2.2363 -0.30786,-0.5698 -0.65918,-1.2154996 -0.83517,-1.5347996 -0.0415,-0.075 -0.0816,-0.1346 -0.0893,-0.1318 -0.0482,0.017 0.0147,0.2513 0.36132,1.3457996 0.17208,0.5435 0.28136,0.9068 0.32218,1.0713 0.0245,0.099 0.0285,0.1444 0.0282,0.3207 -3.3e-4,0.201 -0.0274,0.4271 -0.0552,0.4613 -0.006,0.01 -0.0231,0.012 -0.0381,0.01 -0.33991,-0.05 -1.05936,-0.199 -3.04403,-0.6307 -0.104,-0.023 -0.14988,-0.038 -0.15389,-0.051 -0.0118,-0.039 -1.15775,-5.4372996 -1.47252,-6.9364996 -0.135,-0.643 -0.42557,-2.0441 -0.43839,-2.1138 -0.007,-0.036 -0.005,-0.038 0.0378,-0.045 0.0627,-0.01 1.08294,-0.141 2.27802,-0.2926 0.55589,-0.07 1.17956,-0.1497 1.38593,-0.176 0.20638,-0.026 1.11057,-0.1405 2.0093,-0.2538 1.58362,-0.1998 3.5388506,-0.4481 3.9096706,-0.4965 0.86095,-0.1125 1.22192,-0.1573 1.28861,-0.1599 l 0.0782,0 0.0583,0.4237 c 0.0321,0.233 0.13415,0.971 0.22688,1.6401 0.34992,2.5247 0.53032,3.8993 0.57594,4.3883 l 0.008,0.085 -0.313,0.2426 c -0.39577,0.3067 -0.82747,0.6371 -1.07056,0.8193 l -0.18866,0.1415 -0.10184,0 c -0.21583,-10e-5 -0.81673,-0.033 -1.8811606,-0.1037 -0.6868,-0.045 -1.03543,-0.057 -1.04327,-0.034 -0.008,0.024 0.68396,0.6313 3.0041506,2.6358996 l 0.73836,0.638 0.1378,0.2748 c 0.15782,0.3149 0.20273,0.4234 0.18322,0.4429 -0.0177,0.018 -3.5023606,0.3355 -4.2609406,0.3886 -0.38845,0.027 -0.33282,0.044 -0.42946,-0.1299 z m -2.19857,-6.0306996 c 0.48603,-0.089 1.74243,-0.3434 2.12774,-0.4308 l 0.1712,-0.039 0.005,-0.044 c 0.0118,-0.095 -0.0234,-0.9543 -0.0519,-1.2663 -0.015,-0.165 -0.022,-0.1997 -0.04,-0.1998 -0.008,-1e-4 -0.14489,-0.019 -0.30467,-0.042 -0.15977,-0.023 -0.48114,-0.067 -0.71414,-0.098 -0.23301,-0.031 -0.62246,-0.082 -0.86546,-0.1144 -0.7463,-0.099 -1.08752,-0.1395 -1.09662,-0.1304 -0.0168,0.017 -0.0276,0.4331 -0.0283,1.0935 l -7.3e-4,0.6671 0.19224,0.2553 c 0.26144,0.3472 0.29857,0.3896 0.34125,0.3896 0.0188,0 0.13764,-0.019 0.26398,-0.042 z"/>
-      </svg>
+  <!-- Modal (for editing messages & characters) -->
+  <div id="modalOverlay" class="modal-overlay" role="dialog" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Edit Message</h3>
+
+      <div class="row">
+        <label class="small">Username</label>
+        <input id="modalUsername" type="text" />
+      </div>
+
+      <div class="row">
+        <label class="small">Text</label>
+        <textarea id="modalText" rows="4"></textarea>
+      </div>
+
+      <div class="row">
+        <label class="small">Alignment</label>
+        <select id="modalAlign">
+          <option value="left">Left (Other)</option>
+          <option value="right">Right (You)</option>
+        </select>
+      </div>
+
+      <div class="row checkbox-group">
+        <input id="modalShowUsername" type="checkbox" />
+        <label for="modalShowUsername">Show Username</label>
+      </div>
+
+      <div class="row">
+        <label class="small">Message Image (optional)</label>
+        <input id="modalImageFile" type="file" accept="image/*" />
+        <img id="modalImagePreview" class="img-preview" style="display:none;" />
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
+          <label class="small">Image size</label>
+          <input id="modalImageSize" type="range" min="40" max="400" value="200" />
+          <span id="modalImageSizeVal" class="small">200</span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button id="modalDeleteBtn" class="delete-btn">Delete</button>
+        <button id="modalCancelBtn">Cancel</button>
+        <button id="modalSaveBtn">Save</button>
+      </div>
     </div>
   </div>
 
@@ -414,8 +388,7 @@ Character 1: nothing much"></textarea>
     let messages = [];
     let savedCharacters = [];
     let autoPages = []; // [{frame, chatArea}]
-    let currentEditingMessage = null;
-    let isAutomating = false;
+    let currentEditingIndex = null; // index in messages when modal editing
 
     // ===== OpenRouter / DeepSeek (optional) =====
     const OPENROUTER_API_KEY = "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";
@@ -425,17 +398,6 @@ Character 1: nothing much"></textarea>
       "Authorization":`Bearer ${OPENROUTER_API_KEY}`,
       "HTTP-Referer":"https://jebth.github.io/FRCG/",
       "X-Title":"FRCG - Fake Roblox Chat Generator"
-    };
-
-    // Emoji mapping for different emotions
-    const EMOJI_MAP = {
-      happy: ["😊", "😄", "😂", "😆", "🤣"],
-      sad: ["😢", "😭", "😔", "🥺", "😞"],
-      angry: ["😠", "😡", "🤬", "👿", "💢"],
-      surprised: ["😲", "😮", "🤯", "😳", "😱"],
-      love: ["😍", "🥰", "😘", "❤️", "💕"],
-      funny: ["🤣", "😝", "😜", "🤪", "🃏"],
-      neutral: ["🙂", "😐", "🤔", "👍", "👌"]
     };
 
     // ===== Local Storage =====
@@ -535,11 +497,13 @@ Character 1: nothing much"></textarea>
         item.className = 'message-item';
         item.innerHTML = `
           <div style="display:flex;align-items:center;gap:10px;">
-            <img src="${char.profilePic}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">
+            <div style="width:30px;height:30px;border-radius:50%;background:#D0D8FC;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+              <img src="${char.profilePic}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">
+            </div>
             <span style="font-size:14px;">${char.name}</span>
           </div>
           <div>
-            <button class="edit-btn" onclick="editCharacter(${idx})">Edit</button>
+            <button class="edit-btn" onclick="openEditCharacterModal(${idx})">Edit</button>
             <button class="delete-btn" onclick="deleteCharacter(${idx})">Delete</button>
           </div>`;
         list.appendChild(item);
@@ -550,35 +514,31 @@ Character 1: nothing much"></textarea>
         opt.value = char.id; opt.textContent = char.name; sel.appendChild(opt);
       });
     }
-    function editCharacter(index){
+
+    // Open character edit via modal
+    function openEditCharacterModal(index){
       const char = savedCharacters[index];
-      const newName = prompt('Edit character name:', char.name);
-      if (newName === null) return;
-      const trimmed = newName.trim();
-      if (!trimmed) return alert('Name cannot be empty.');
-      const fileInput = document.createElement('input');
-      fileInput.type = 'file'; fileInput.accept='image/*';
-      fileInput.onchange = e=>{
-        const file = e.target.files[0];
-        if (file){
-          const r = new FileReader();
-          r.onload = ev=>{
-            char.profilePic = ev.target.result; char.name = trimmed;
-            savedCharacters[index] = char; saveData();
-            renderCharacters(); renderMessages(); buildPagesFromMessages();
-          };
-          r.readAsDataURL(file);
-        } else {
-          char.name = trimmed; savedCharacters[index] = char; saveData();
-          renderCharacters(); renderMessages(); buildPagesFromMessages();
-        }
-      };
-      if (confirm('Update the profile picture too?')) fileInput.click();
-      else {
-        char.name = trimmed; savedCharacters[index] = char; saveData();
-        renderCharacters(); renderMessages(); buildPagesFromMessages();
-      }
+      if (!char) return;
+      // Reuse message modal fields but prefill and set save to handle character replacement
+      openModalForCharacter(index);
     }
+
+    function editCharacter_saveFromModal(index, newName, newProfileData){
+      if (!newName || !newName.trim()) return alert('Name cannot be empty.');
+      const char = savedCharacters[index];
+      char.name = newName.trim();
+      if (newProfileData) char.profilePic = newProfileData;
+      savedCharacters[index] = char;
+      // update messages referencing this char
+      messages = messages.map(m=>{
+        if (m.characterId && m.characterId === char.id) {
+          return {...m, profilePic:char.profilePic, username:char.name};
+        }
+        return m;
+      });
+      saveData(); renderCharacters(); renderMessages(); buildPagesFromMessages();
+    }
+
     function deleteCharacter(index){
       if (!confirm('Delete this character?')) return;
       const removed = savedCharacters.splice(index,1)[0];
@@ -617,6 +577,8 @@ Character 1: nothing much"></textarea>
         align,
         profilePic: defaultProfilePics[align],
         image: null,
+        imageSize: 200,
+        placeholderImage: false,
         showUsername,
         characterId: selectedCharId ? Number(selectedCharId) : null
       };
@@ -681,964 +643,542 @@ Character 1: nothing much"></textarea>
         group.messages.forEach((msg, idx)=>{
           const row = document.createElement('div'); row.className='message-row';
           if (idx===0){
-            const p = document.createElement('img'); p.src = group.profilePic; p.className='profile-pic'; row.appendChild(p);
+            const pWrap = document.createElement('div'); pWrap.className='profile-pic-wrap';
+            const p = document.createElement('img'); p.src = group.profilePic; p.className='profile-pic'; pWrap.appendChild(p);
+            row.appendChild(pWrap);
           } else {
-            const sp = document.createElement('div'); sp.className='profile-pic'; sp.style.visibility='hidden'; row.appendChild(sp);
+            const sp = document.createElement('div'); sp.className='profile-pic-wrap'; sp.style.visibility='hidden'; row.appendChild(sp);
           }
-          const bubble = document.createElement('div'); 
-          bubble.className='message'; 
-          bubble.dataset.messageId = msg.id;
-          bubble.draggable = true;
-          bubble.addEventListener('dragstart', handleDragStart);
-          bubble.addEventListener('dragend', handleDragEnd);
-          bubble.addEventListener('dblclick', () => openEditModal(msg.id));
-          
-          if (msg.text){ 
-            const t=document.createElement('span'); 
-            t.textContent = msg.text; 
-            bubble.appendChild(t); 
+          const bubble = document.createElement('div'); bubble.className='message'; bubble.dataset.messageId = msg.id;
+          // double-click to edit
+          bubble.addEventListener('dblclick', ()=> openEditMessageModal(messages.findIndex(x=>x.id===msg.id)));
+          if (msg.text){ const t=document.createElement('span'); t.textContent = msg.text; bubble.appendChild(t); }
+          if (msg.image){
+            const im=document.createElement('img'); im.src=msg.image; im.className='message-image';
+            im.style.width = (msg.imageSize ? msg.imageSize + 'px' : '200px');
+            bubble.appendChild(im);
           }
-          if (msg.image){ 
-            const im=document.createElement('img'); 
-            im.src=msg.image; 
-            im.className='message-image resizable-image'; 
-            bubble.appendChild(im); 
+          if (msg.placeholderImage){
+            const ph = document.createElement('div'); ph.style.cssText='margin-top:8px;padding:8px;border-radius:8px;background:#222;color:#999;font-size:13px;text-align:center;cursor:pointer;';
+            ph.textContent = 'Click to add image';
+            ph.addEventListener('click', ()=> openEditMessageModal(messages.findIndex(x=>x.id===msg.id)));
+            bubble.appendChild(ph);
           }
-          row.appendChild(bubble); 
-          g.appendChild(row);
+          row.appendChild(bubble); g.appendChild(row);
         });
         chatArea.appendChild(g);
       });
       chatArea.scrollTop = chatArea.scrollHeight;
 
-      // Render message list with edit/delete
+      // Render message list with edit/delete & drag handles
       messageList.innerHTML = '';
       messages.forEach((m, idx)=>{
         const char = m.characterId ? savedCharacters.find(c=>c.id===m.characterId) : null;
         const displayName = char ? char.name : m.username;
         const item = document.createElement('div');
         item.className = 'message-item';
-        const label = m.text ? m.text.substring(0, 30)) + (m.text.length + (m.text.length>30?'…':'') : '[Image]>30?'…':'') : '[Image]';
+        item.draggable = true;
+        item.dataset.index = idx;
         item.innerHTML = `
-          <span>[${m.align';
-        item.innerHTML = `
-          <span>[${m.align.toUpperCase()}] ${displayName}: ${.toUpperCase()}] ${displayName}: ${label}</span>
-          <label}</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="drag-handle">≡</span>
+            <div style="display:flex;flex-direction:column;">
+              <span style="font-size:13px;">[${m.align.toUpperCase()}] ${displayName}</span>
+              <span style="font-size:12px;color:#bbb;">${m.text? (m.text.length>40? m.text.substring(0,40)+'…': m.text) : '[Image]'}</span>
+            </div>
+          </div>
           <div>
-            <button class="edit-btn" onclick="openEditModal($div>
-            <button class="edit-btn" onclick="openEditModal(${{m.id})">Edit</m.id})">Edit</button>
-            <button class="delete-btn" onclick="deleteMessagebutton>
-            <button class="delete-btn" onclick="deleteMessage(${(${idx})">Delete</button>
-          </div>idx})">Delete</button>
+            <button class="edit-btn" onclick="openEditMessageModal(${idx})">Edit</button>
+            <button class="delete-btn" onclick="deleteMessage(${idx})">Delete</button>
           </div>`;
-        messageList.appendChild`;
+        // drag events
+        item.addEventListener('dragstart', (ev)=> {
+          ev.dataTransfer.setData('text/plain', idx.toString());
+          ev.dataTransfer.effectAllowed = 'move';
+          item.style.opacity = '0.4';
+        });
+        item.addEventListener('dragend', ()=> { item.style.opacity = '1'; });
+        item.addEventListener('dragover', (ev)=> { ev.preventDefault(); item.classList.add('drag-over'); });
+        item.addEventListener('dragleave', ()=> { item.classList.remove('drag-over'); });
+        item.addEventListener('drop', (ev)=> {
+          ev.preventDefault();
+          item.classList.remove('drag-over');
+          const from = Number(ev.dataTransfer.getData('text/plain'));
+          const to = Number(item.dataset.index);
+          if (!isNaN(from) && !isNaN(to) && from !== to){
+            const [moved] = messages.splice(from,1);
+            messages.splice(to,0,moved);
+            saveData(); renderMessages(); buildPagesFromMessages();
+          }
+        });
+
         messageList.appendChild(item);
-     (item);
       });
     }
 
-    function });
+    function openEditMessageModal(index){
+      currentEditingIndex = index;
+      const m = messages[index];
+      if (!m) return;
+      openModalForMessage(m, index);
     }
 
-    function openEditModal openEditModal(messageId)(messageId) {
-      const message {
-      const messageIndex = messages.findIndex(m => m.id === messageId);
-      if (messageIndex === -Index = messages.findIndex(m => m.id === messageId);
-      if (messageIndex === -1) return;
-      
-     1) return;
-      
-      currentEditingMessage = messageIndex;
-      const message currentEditingMessage = messageIndex;
-      const message = messages = messages[message[messageIndexIndex];
-      
-     ];
-      
-      // Update modal content
-      document.getElementById('modalMessageText').value = message // Update modal content
-      document.getElementById('modalMessageText').value = message.text || '';
-      document.getElementById('modalMessageImage').value = '';
-      
-.text || '';
-      document.getElementById('modalMessageImage').value = '';
-      
-           // Create preview
-      const modal // Create preview
-      const modalPreview = documentPreview = document.getElementById('modalPreview.getElementById('modalPreview');
-     ');
-      modalPreview.innerHTML modalPreview.innerHTML = '';
-      
-      const previewBubble = document.createElement('div');
-      = '';
-      
-      const previewBubble = document.createElement previewBubble.className =('div');
-      previewB `messageubble.className = `message ${message ${message.align.align === 'right === 'right' ? 'right' ? 'right' :' : ''}`;
- ''}`;
-      
-      if (message      
-      if (message.text.text) {
-       ) {
-        const text const textSpan = document.createElementSpan = document.createElement('span');
-       ('span');
-        text textSpanSpan.textContent = message.text;
-        previewBubble.appendChild(textSpan);
-     .textContent = message.text;
-        previewBubble.appendChild(textSpan);
-      }
-      
-      if (message.image) {
-        const img = document.createElement(' }
-      
-      if (message.image) {
-        const img = document.createElement('img');
-       img');
-        img.src = img.src = message.image;
-        message.image;
-        img.className = 'message-image';
-        previewBubble.appendChild img.className = 'message-image';
-        previewBubble.appendChild(img(img);
-      }
-      
-      modalPreview);
-      }
-      
-      modalPreview.appendChild(pre.appendChild(previewBubbleviewBubble);
-      
-      // Show);
-      
-      // Show modal modal
-      document.getElementById('
-      document.getElementById('editModal').styleeditModal').style.display =.display = 'flex 'flex';
-   ';
-    }
+    // Modal helpers
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalUsername = document.getElementById('modalUsername');
+    const modalText = document.getElementById('modalText');
+    const modalAlign = document.getElementById('modalAlign');
+    const modalShowUsername = document.getElementById('modalShowUsername');
+    const modalImageFile = document.getElementById('modalImageFile');
+    const modalImagePreview = document.getElementById('modalImagePreview');
+    const modalImageSize = document.getElementById('modalImageSize');
+    const modalImageSizeVal = document.getElementById('modalImageSizeVal');
+    const modalSaveBtn = document.getElementById('modalSaveBtn');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+    const modalDeleteBtn = document.getElementById('modalDeleteBtn');
 
-    function close }
+    modalImageSize.addEventListener('input', ()=> { modalImageSizeVal.textContent = modalImageSize.value; if (modalImagePreview.style.display!=='none') modalImagePreview.style.width = modalImageSize.value + 'px'; });
 
-    function closeModal() {
-     Modal() {
-      document.getElementById document.getElementById('editModal').('editModal').style.display = 'style.display = 'none';
-      currentnone';
-      currentEditingMessage = null;
-    }
+    modalImageFile.addEventListener('change', e=>{
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = ev => { modalImagePreview.src = ev.target.result; modalImagePreview.style.display='block'; modalImagePreview.style.width = modalImageSize.value + 'px'; };
+      r.readAsDataURL(f);
+    });
 
-    function saveModalChanges() {
-EditingMessage = null;
-    }
+    modalCancelBtn.addEventListener('click', ()=> { closeModal(); });
+    modalOverlay.addEventListener('click', (e)=> { if (e.target === modalOverlay) closeModal(); });
 
-    function saveModalChanges() {
-      if (currentEditingMessage === null      if (currentEditingMessage === null)) return;
-      
-      return;
-      
-      const newText = document.getElementById('modalMessageText').value;
-      const imageFile = document.getElementById const newText = document.getElementById('modalMessageText').value;
-      const imageFile = document('modalMessageImage').files[0];
-      
-      messages.getElementById('modalMessageImage').files[0];
-      
-      messages[currentEditing[currentEditingMessage].text =Message].text = newText;
- newText;
-      
-      if (imageFile)      
-      if (imageFile) {
-        {
-        const reader const reader = new = new FileReader FileReader();
-       ();
-        reader.onload reader.onload = e => = e => {
-          messages[currentEditingMessage {
-          messages[currentEditingMessage].image].image = e.target = e.target.result;
-          save.result;
-          saveDataData();
-          renderMessages();
-          renderMessages();
-         ();
-          buildPages buildPagesFromMessages();
-          closeModalFromMessages();
+    modalSaveBtn.addEventListener('click', ()=>{
+      if (currentEditingIndex === null){
+        // character edit flow
+        const charIndex = modalOverlay.dataset.charIndex ? Number(modalOverlay.dataset.charIndex) : null;
+        if (charIndex !== null && charIndex !== undefined){
+          const newName = modalUsername.value.trim();
+          const newProfileData = modalImagePreview.src && modalImagePreview.style.display!=='none' ? modalImagePreview.src : null;
+          editCharacter_saveFromModal(charIndex, newName, newProfileData);
           closeModal();
-        };
-       ();
-        };
-        reader.readAsDataURL(image reader.readAsDataURL(imageFileFile);
-      });
-      } else else {
-        save {
-        saveData();
-Data();
-        renderMessages        renderMessages();
-        buildPagesFrom();
-        buildPagesFromMessages();
-        closeMessages();
-        closeModalModal();
-();
+          return;
+        }
+        closeModal();
+        return;
       }
-         }
+      const idx = currentEditingIndex;
+      const m = messages[idx];
+      if (!m) { closeModal(); return; }
+      const newUsername = modalUsername.value || m.username;
+      const newText = modalText.value;
+      const newAlign = modalAlign.value;
+      const newShow = modalShowUsername.checked;
+      let newImage = m.image;
+      if (modalImagePreview.src && modalImagePreview.style.display!=='none'){
+        newImage = modalImagePreview.src;
+      }
+      m.username = newUsername;
+      m.text = newText;
+      m.align = newAlign;
+      m.showUsername = newShow;
+      m.image = newImage;
+      m.placeholderImage = false;
+      m.imageSize = Number(modalImageSize.value) || m.imageSize || 200;
+      // If message is now connected to a saved character name, update characterId? We leave characterId intact unless user specified
+      saveData(); renderMessages(); buildPagesFromMessages(); closeModal();
+    });
+
+    modalDeleteBtn.addEventListener('click', ()=>{
+      if (currentEditingIndex === null){
+        // delete character if dataset set
+        const charIndex = modalOverlay.dataset.charIndex ? Number(modalOverlay.dataset.charIndex) : null;
+        if (charIndex !== null && charIndex !== undefined){
+          if (confirm('Delete this character?')) deleteCharacter(charIndex);
+          closeModal(); return;
+        }
+        closeModal(); return;
+      }
+      if (!confirm('Delete this message?')) return;
+      messages.splice(currentEditingIndex,1);
+      saveData(); renderMessages(); buildPagesFromMessages(); closeModal();
+    });
+
+    function openModalForMessage(m, index){
+      currentEditingIndex = index;
+      modalOverlay.dataset.charIndex = '';
+      document.getElementById('modalTitle').textContent = 'Edit Message';
+      modalUsername.value = m.username || '';
+      modalText.value = m.text || '';
+      modalAlign.value = m.align || 'left';
+      modalShowUsername.checked = !!m.showUsername;
+      modalImageSize.value = m.imageSize || 200;
+      modalImageSizeVal.textContent = modalImageSize.value;
+      if (m.image){
+        modalImagePreview.src = m.image; modalImagePreview.style.display='block'; modalImagePreview.style.width = (m.imageSize || 200) + 'px';
+      } else {
+        modalImagePreview.style.display='none'; modalImagePreview.src='';
+      }
+      modalImageFile.value = '';
+      modalOverlay.classList.add('active');
+    }
+
+    function openModalForCharacter(index){
+      const char = savedCharacters[index];
+      currentEditingIndex = null;
+      modalOverlay.dataset.charIndex = index;
+      document.getElementById('modalTitle').textContent = 'Edit Character';
+      modalUsername.value = char.name || '';
+      modalText.value = ''; // not used
+      modalAlign.value = 'left';
+      modalShowUsername.checked = true;
+      modalImagePreview.src = char.profilePic; modalImagePreview.style.display='block'; modalImagePreview.style.width='80px';
+      modalImageSize.value = 80; modalImageSizeVal.textContent = '80';
+      modalOverlay.classList.add('active');
+    }
+
+    function closeModal(){
+      modalOverlay.classList.remove('active');
+      currentEditingIndex = null;
+      modalOverlay.dataset.charIndex = '';
+      modalImagePreview.src=''; modalImagePreview.style.display='none';
+    }
+
+    function editMessage(index){
+      openEditMessageModal(index);
     }
 
     function deleteMessage(index){
-      messages.s }
-
-    function deleteMessage(index){
-      messages.splice(index,plice(index,1); saveData(); renderMessages(); buildPagesFromMessages();
-    }
-
-    function clearAllMessages1); saveData(); renderMessages(); buildPages(){
-      if (!confirm('ClearFromMessages();
+      if (!confirm('Delete this message?')) return;
+      messages.splice(index,1); saveData(); renderMessages(); buildPagesFromMessages();
     }
 
     function clearAllMessages(){
-      if (!confirm('Clear ALL messages ALL messages?')) return;
-      messages = []; save?')) return;
-      messages = []; saveDataData();(); renderMessages(); build renderMessages(); buildPagesFromMessages();
+      if (!confirm('Clear ALL messages?')) return;
+      messages = []; saveData(); renderMessages(); buildPagesFromMessages();
     }
-
-    // ===== Drag and Drop functionality =PagesFromMessages();
-    }
-
-    // ===== Drag and Drop functionality =========
-    let dragged
-    let draggedElementElement = null = null;
-
-    function handle;
-
-    functionDragStart(e) handleDragStart(e) {
-      draggedElement = e.target;
-      e.target.classList.add('dragging {
-      draggedElement = e.target;
-      e.target.classList.add('dragging');
-      e.data');
-      e.dataTransfer.effectAllowedTransfer.effectAllowed = 'move';
-      e.data = 'move';
-      e.dataTransfer.setDataTransfer('text.setData('text/plain', e/plain', e.target.target.dataset.messageId.dataset.messageId);
-    }
-
-   );
-    }
-
-    function function handleDragEnd(e handleDragEnd(e)) {
-      e {
-      e.target.classList.remove('dragging.target.classList.remove('dragging');
-    }
-
-   ');
-    }
-
-    function handleDragOver(e) function handleDragOver(e) {
-      e.preventDefault {
-      e.preventDefault();
-      e.data();
-      e.dataTransferTransfer.dropEffect = '.dropEffect = 'move';
-   move';
-    }
-
-    function handleDrop }
-
-    function handleDrop(e)(e) {
-      e.preventDefault {
-      e.preventDefault();
-      const messageId =();
-      const messageId parseInt(e.dataTransfer = parseInt(e.dataTransfer.getData.getData('text('text/plain'));
-      const target/plain'));
-      const targetMessage =Message = e e.target.closest('.message');
-.target.closest('.message      
-     ');
-      
-      if (!targetMessage || ! if (!targetMessage ||draggedElement) return;
-      
-      const targetId !draggedElement) return;
-      
-      const targetId = parseInt(targetMessage.dataset.message = parseInt(targetMessage.dataset.messageId);
-      if (messageId === targetId);
-      if (messageId === targetId)Id) return;
- return;
-      
-      // Reorder messages      
-      // Reorder messages array
-      array
-      const fromIndex = const fromIndex = messages.find messages.findIndex(m => mIndex(m => m.id === messageId.id === messageId);
-      const to);
-      const toIndex =Index = messages.find messages.findIndex(mIndex(m => m.id === => m.id === target targetId);
-Id);
-      
-      if      
-      if (fromIndex === (fromIndex === -1 || to -1 || toIndexIndex === -1 === -1) return) return;
-      
-;
-      
-      const      const [movedMessage [movedMessage]] = messages.splice(from = messages.splice(fromIndex, 1Index, 1);
-      messages.s);
-      messages.splice(toIndex, 0, movedplice(toIndex, 0, movedMessageMessage);
-      
-      saveData();
-      renderMessages();
-      buildPagesFromMessages();
-   );
-      
-      saveData();
-      renderMessages();
-      buildPagesFromMessages();
-    }
-
-    }
-
-    // Add drop // Add drop event listeners event listeners to chat to chat area area
-    document
-    document.getElementById('chat.getElementById('chatArea').Area').addEventListener('draaddEventListener('dragovergover', handle', handleDragOver);
-   DragOver);
-    document.getElementById('chatArea').addEventListener('drop document.getElementById('chatArea').', handleDrop);
-
-    //addEventListener('drop', handleDrop);
 
     // ===== Manual single page PNG =====
- ===== Manual single page PNG =====
     function downloadImage(){
-      const phoneFrame    function downloadImage(){
-      const phoneFrame = document.getElementById(' = document.getElementById('phoneFrame');
-phoneFrame');
-      html2canvas      html2canvas(phoneFrame(phoneFrame,, {
-        backgroundColor {
-        backgroundColor:'#:'#121214',
-       121214',
-        scale:2, scale:2, width: width:375,375, height: height:667, useC667, useCORSORS::truetrue, allowTaint:true, allowTaint:true
-      }).then(c
-      }).then(canvasanvas=>{
-        const=>{
-        const a = document.createElement a = document.createElement('a('a');
-       ');
-        a.d a.download = 'roblownload = 'roblox-chox-chat-' + Date.now() + '.png';
-        a.href = canvasat-' + Date.now() + '.png';
+      const phoneFrame = document.getElementById('phoneFrame');
+      html2canvas(phoneFrame, {
+        backgroundColor:'#121214',
+        scale:2, width:375, height:667, useCORS:true, allowTaint:true
+      }).then(canvas=>{
+        const a = document.createElement('a');
+        a.download = 'roblox-chat-' + Date.now() + '.png';
         a.href = canvas.toDataURL(); a.click();
-      }).catch.toDataURL(); a.click();
-      }).catch(err=>{ console.error(err(err=>{ console.error(err); alert('Error generating image.'); });
+      }).catch(err=>{ console.error(err); alert('Error generating image.'); });
     }
 
-    //); alert('Error generating image.'); });
-    }
-
-    // ===== Enhanced ===== Enhanced AI Automation with Emoj AI Automation with Emojis =====is =====
-   
+    // ===== Automate: push into Message List (then build pages) =====
     async function automateConversation(){
- async function automateConversation(){
-           if (isAutomating) return;
-      isAutomating = true if (isAutomating) return;
-      isAutomating = true;
-      showLoading;
-      showLoadingScreen();
-      
-      const script = document.getElementByIdScreen();
-      
-      const script = document.getElementById('('automateautomateScript').value.trim();
-     Script').value.trim();
-      const const useEmojis = document.getElementById(' useEmojis = document.getElementById('useEmojisuseEmojis').checked;
-      
-').checked;
-      
-      if (!script      if (!script) {
-        hideLoadingScreen();
-       ) {
-        hideLoadingScreen();
-        isAutom isAutomating = falseating = false;
-        return alert(';
-        return alert('PPaste a script first.');
-     aste a script first.');
-      }
+      const script = document.getElementById('automateScript').value.trim();
+      if (!script) return alert('Paste a script first.');
 
-      let }
+      const automateBtn = document.getElementById('automateBtn');
+      const loader = document.getElementById('loader');
 
-      let parsed = null parsed = null;
-;
+      // prevent spamming
+      automateBtn.disabled = true;
+      loader.classList.add('active');
+
+      // small delay to simulate and avoid double clicks, and give loader a chance to show
+      await new Promise(r=>setTimeout(r,250));
+
+      let parsed = null;
       try {
-        const      try {
-        const system systemPrompt = useEmPrompt = useEmojisojis ? ? 
-          `You format 
-          `You format scripts into scripts into Roblox chat JSON Roblox chat JSON with appropriate emoj with appropriate emojisis.
-          Input.
-          Input: a: a script with lines like ' script with lines like 'NameName: message' or: message' or dialog blocks dialog blocks.
-          Output: ONLY valid JSON array.
-          Output: ONLY valid JSON array (no code fences, no prose (no code fences, no prose), like:
-          [{"character":"Character), like:
-          [{"character":"Character 1","text":"hello 😊"},{"character":"Character  1","text":"hello 😊"},{"character":"Character 2","text2","text":"hi! 👋":"hi! 👋"}]
-         "}]
-          Add Add 1- 1-33 emoj emojis to messages where appropriate basedis to messages where appropriate based on emotion (happy, sad on emotion (happy, sad, angry, surprised, angry, surprised, love, funny, love, funny).
-          Don't add em).
-          Don't add emojis to every message -ojis to every message - only when it fits naturally.
-          If names are present, keep them; otherwise only when it fits naturally.
-          If names are present, keep them; otherwise label as Character label as Character 1 1/2/2/3.`/3.` :
-          :
-          `You format scripts into Rob `You format scripts into Roblox chat JSON.
-         lox chat JSON.
-          Input: a Input: a script with lines like 'Name: message script with lines like 'Name: message' or dialog blocks' or dialog blocks.
-         .
-          Output: Output: ONLY valid JSON array ONLY valid JSON array (no code fences, no (no code fences, no prose), like:
-          prose), like:
-          [{"character":"Character [{"character":"Character 1","text 1","text":"hello"},{"character":"hello"},{"character":"Character 2","":"Character 2","text":"hi!"}text":"hi!"}]
-          If names]
-          If names are are present, present, keep them; otherwise label as Character 1/2/3. keep them; otherwise label as Character 1/2/3.`;
-
-       `;
-
         const resp = await fetch(OPENROUTER_URL, {
           method:'POST',
-          headers const resp = await fetch(OPENROUTER_URL, {
-          method:'POST',
-         : headers: OPEN OPENROUTER_HEADERSROUTER_HEADERS,
-          body:,
-          body: JSON.stringify JSON.stringify({
-            model:({
-            model: "deep "deepseek/deepseek-chat-v3-seek/deepseek-chat-v3-0320324:4:freefree",
-            messages:",
+          headers: OPENROUTER_HEADERS,
+          body: JSON.stringify({
+            model: "deepseek/deepseek-chat-v3-0324:free",
             messages: [
-              [
-              { role:" { role:"system",system", content: systemPrompt content: systemPrompt },
-              { role },
-              { role:"user", content: script:"user", content: script }
+              { role:"system", content: [
+                "You format scripts into Roblox chat JSON.",
+                "Input: a script with lines like 'Name: message' or dialog blocks.",
+                "Output: ONLY valid JSON array (no code fences, no prose), like:",
+                `[{"character":"Character 1","text":"hello"},{"character":"Character 2","text":"hi!"}]`,
+                "If names are present, keep them; otherwise label as Character 1/2/3."
+              ].join("\n") },
+              { role:"user", content: script }
             ],
-            }
-            ],
-            temperature:0. temperature:0.77
-          })
-       
+            temperature:0.2
           })
         });
-        const data });
-        const data = = await resp.json();
- await resp.json();
-        let        let content = content = (data && (data && data.choices data.choices && data.choices && data.choices[0[0] && data.] && data.choiceschoices[0].message &&[0].message && data. data.choices[0].message.content) ||choices[0].message.content) || "";
-        content = stripCodeFencesToJSON(content);
-        "";
+        const data = await resp.json();
+        let content = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
         content = stripCodeFencesToJSON(content);
         parsed = JSON.parse(content);
- parsed = JSON.parse(content);
-        if (!Array.isArray(        if (!Array.isArray(parsedparsed)) throw new Error)) throw new Error('Not an array('Not an array');
-     ');
-      } catch(e } catch(e){
-        //){
-        // fallback: local fallback: local parse parse
-        parsed
-        parsed = localParseScript = localParseScript(script(script);
+        if (!Array.isArray(parsed)) throw new Error('Not an array');
+      } catch(e){
+        // fallback: local parse
+        parsed = localParseScript(script);
       }
 
-     );
-      }
-
-      // Map / create // Map / create characters by name characters by name
-
-      const nameTo      const nameToId =Id = {};
-      const now {};
-      const nowBase = Date.nowBase = Date.now();
-     ();
-      const unique = const unique = [];
-      parsed.forEach(( [];
-      parsed.forEach((line,line, i i)=>{
-        const)=>{
-        const nm = nm = (line (line.character.character || || ''). '').trim() || `Character ${i+1}`trim;
-        if (!unique.includes(nm)) unique.push(n() || `Character ${i+1}`;
-        if (!unique.includes(nm)) uniquem);
-      });
-      unique.forEach((.push(nm);
-      });
-      unique.forEach((nm, inm, i)=>{
-        let)=>{
-        let existing = savedCharacters existing = savedCharacters.find(c=>c.find(c=>c.name.toLowerCase() === nm.name.toLowerCase() === nm.toLowerCase());
-        if (!existing){
-          existing = {.toLowerCase());
-        if (!existing){
-          existing = { id: nowBase + i, name id: nowBase + i, name: nm, profilePic: defaultProfile: nm, profilePic: defaultProfilePics.left };
-          savedCharacters.push(existing);
-        }
-       Pics.left };
-          savedCharacters.push(existing);
- nameTo        }
-        nameToId[nm]Id[nm = existing.id] = existing.id;
-      });
-
-      // Check;
-      });
-
-      // Check for image placeholders for image placeholders
-      parsed.forEach
+      // Map / create characters by name
+      const nameToId = {};
+      const nowBase = Date.now();
+      const unique = [];
       parsed.forEach((line, i)=>{
-       ((line, i)=>{
-        if (line.text && if (line line.text.includes('.text && line.text.includes('Add image'))Add image')) {
-          // This {
-          // is an image placeholder This is an image placeholder
-          line.isImagePlaceholder = true
-          line.isImagePlaceholder = true;
-          line.text = 'Add image';
-;
-          line.text = 'Add image';
+        const nm = (line.character || '').trim() || `Character ${i+1}`;
+        if (!unique.includes(nm)) unique.push(nm);
+      });
+      unique.forEach((nm, i)=>{
+        let existing = savedCharacters.find(c=>c.name.toLowerCase() === nm.toLowerCase());
+        if (!existing){
+          existing = { id: nowBase + i, name: nm, profilePic: defaultProfilePics.left };
+          savedCharacters.push(existing);
         }
+        nameToId[nm] = existing.id;
       });
 
-      // Push into Message List        }
-      });
-
-      // Push into Message List (alternate align (alternate align)
-      parsed.forEach(()
-      parsed.forEach((line, iline, i)=>{
-        const)=>{
-        const nm = ( nmline.character || '' = (line.character || '').trim).trim() ||() || `Character ${i `Character ${i++11}`}`;
-        const cid;
+      // Push into Message List (alternate align) with emoji handling and image placeholders
+      const allowEmojis = document.getElementById('allowEmojis').checked;
+      parsed.forEach((line, i)=>{
+        const nm = (line.character || '').trim() || `Character ${i+1}`;
         const cid = nameToId[nm];
-        
- = nameToId[nm];
-        
-        const message = {
-          id: nowBase        const message = {
-          id: nowBase + 100 + 1000 + i,
-          characterId0 + i,
-          characterId: cid: cid,
-          username,
-         : nm username: nm,
-         ,
-          text: line.isImagePlace text: line.isImagePlaceholder ? 'Add image'holder ? 'Add image' : ( : (lineline.text || ''),
-          align:.text || ''),
-          align: (i %  (i % 2 ===2 === 0) ? 0) ? ' 'left'left' : 'right : 'right',
-          profilePic',
-          profilePic: defaultProfilePics[(i % 2 === : defaultProfilePics[(i % 2 === 0) ? 'left'0) ? 'left' : ' : 'rightright'],
-         '],
-          image: line.isImagePlaceholder ? null : image: line.isImagePlaceholder ? null : null null,
-         ,
-          showUsername: true,
-          is showUsername: true,
-          isImageImagePlaceholder:Placeholder: line.isImagePlace line.isImagePlaceholder || false
-        };
+        const rawText = (line.text || '').toString();
 
-        messages.push(message);
-     holder || false
-        };
+        // If the script requested "Add image" or "Add image <something>" treat specially
+        const isAddImage = /add image(\b|$)/i.test(rawText);
 
-        messages.push(message);
+        let finalText = rawText;
+        let placeholderImage = false;
+        let imageData = null;
+
+        if (isAddImage){
+          // remove the phrase from text (so the message bubble isn't full of "Add image")
+          finalText = finalText.replace(/add image/ig,'').trim();
+          // create placeholder image message (if no other text) — mark placeholder
+          placeholderImage = true;
+        } else {
+          // emoji insertion based on simple tone detection
+          if (allowEmojis && finalText.trim()){
+            // 60% chance to add emojis, but not every message
+            if (Math.random() < 0.6){
+              const tone = detectTone(finalText);
+              const emojis = pickEmojisForTone(tone);
+              // pick 1-3 emojis randomly
+              const count = Math.floor(Math.random()*3)+1;
+              let picked = [];
+              for (let k=0;k<count;k++) picked.push(emojis[Math.floor(Math.random()*emojis.length)]);
+              finalText += ' ' + picked.join('');
+            }
+          }
+        }
+
+        messages.push({
+          id: nowBase + 1000 + i + Math.floor(Math.random()*1000),
+          characterId: cid,
+          username: nm,
+          text: finalText,
+          align: (i % 2 === 0) ? 'left' : 'right',
+          profilePic: defaultProfilePics[(i % 2 === 0) ? 'left' : 'right'],
+          image: imageData,
+          imageSize: 200,
+          placeholderImage,
+          showUsername: true
+        });
       });
 
-      saveData(); 
-      renderCharacters });
+      saveData(); renderCharacters(); renderMessages(); buildPagesFromMessages();
 
-      saveData(); 
-      renderCharacters(); 
-      renderMessages(); 
-     (); 
-      renderMessages(); 
-      buildPagesFromMessages();
-      hideLoadingScreen buildPagesFromMessages();
-      hideLoadingScreen();
-      isAutom();
-      isAutomatingating = false;
+      // re-enable
+      loader.classList.remove('active');
+      automateBtn.disabled = false;
     }
 
-    function stripCodeFencesTo = false;
+    function detectTone(text){
+      // very simple tone detection
+      const t = text.toLowerCase();
+      if (/\b(haha|lol|lmao|rofl|xd)\b/.test(t) || /!{2,}/.test(t)) return 'funny';
+      if (/\b(sad|:(\(|:\'\()|cry|tears|sobs)\b/.test(t)) return 'sad';
+      if (/\b(thank|ty|grateful|thanks)\b/.test(t)) return 'grateful';
+      if (/\b(wow|amazing|incredible|awesome|cool|yay)\b/.test(t)) return 'excited';
+      return 'neutral';
+    }
+    function pickEmojisForTone(tone){
+      const map = {
+        funny: ['😄','😂','🤣','😆'],
+        sad: ['😢','☹️','😔','😭'],
+        grateful: ['🙏','😊','💖'],
+        excited: ['🤩','😃','🎉','✨'],
+        neutral: ['🙂','👌','👍']
+      };
+      return map[tone] || map['neutral'];
     }
 
     function stripCodeFencesToJSON(s){
-      let str =JSON(s){
       let str = (s||'').trim();
-      if ( (s||'').trim();
-      if (str.startsWith('```'str.startsWith('```')){
-        str)){
-        str = str.replace = str.replace(/^```(/^```json/i,'```'); str = str.replace(/json/i,'```'); str = str.replace(/^```^```/,''); str = str.replace/,''); str = str.replace(/(/```$/,'```$/,'');
+      if (str.startsWith('```')){
+        str = str.replace(/^```json/i,'```'); str = str.replace(/^```/,''); str = str.replace(/```$/,'');
       }
-      const start');
-      }
-      const start = str.indexOf('[' = str.indexOf('['); const end = str.lastIndexOf(']); const end = str.lastIndexOf(']');
-      if');
-      if ( (start !== -1 && end !== -start !== -1 && end !== -1 && end1 && end > start) str > start) str = str.substring(start, end+1);
- = str.substring(start, end+1);
-           return str.trim();
-    }
-
-    function localParse return str.trim();
+      const start = str.indexOf('['); const end = str.lastIndexOf(']');
+      if (start !== -1 && end !== -1 && end > start) str = str.substring(start, end+1);
+      return str.trim();
     }
 
     function localParseScript(script){
-      const lines = scriptScript(script){
-      const lines = script.split(/\r?\.split(/\r?\n/).n/).map(l=>l.trimmap(l=>l.trim()).filter(Boolean);
-     ()).filter(Boolean);
-      const out const out = = []; let charIndex []; let charIndex =  = 11;
-      lines.forEach(l=>;
+      const lines = script.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      const out = []; let charIndex = 1;
       lines.forEach(l=>{
-        const m = l.match{
-        const m = l.match(/^([^:]{(/^([^:]{1,50}1,50}):\s*(.+)$/);
+        const m = l.match(/^([^:]{1,50}):\s*(.+)$/);
         if (m) out.push({ character:m[1].trim(), text:m[2].trim() });
-        else { out.push({ character:`):\s*(.+)$/);
-        if (m) out.push({ character:m[1].trim(), text:m[2].trim() });
-        else { out.push({ character:`Character ${Character ${charIndex}charIndex}`, text`, text:l });:l }); charIndex = charIndex = (char (charIndex % 2) +Index % 2) + 1; 1; }
- }
+        else { out.push({ character:`Character ${charIndex}`, text:l }); charIndex = (charIndex % 2) + 1; }
       });
-      return      });
       return out;
     }
 
- out;
-       // ===== Loading Screen }
-
-    // ===== Loading Screen =====
-    =====
-    function show function showLoadingScreen() {
-     LoadingScreen() {
-      document.getElementById(' document.getElementById('loadingOverlay').style.display = 'flex';
-    }
-
-    function hideLoadingloadingOverlay').style.display = 'flex';
-    }
-
-    function hideLoadingScreen() {
-     Screen() {
-      document document.getElementById('loadingOverlay.getElementById('loadingOverlay').style.display = 'none').style.display =';
-    'none';
-    }
-
-    }
-
-    // = // ===== Build==== Build static auto pages from static auto pages from Message List Message List =====
-    =====
-    function function build buildPagesFromMessages(){
-      const container = document.getElementById('pagesPagesFromMessages(){
+    // ===== Build static auto pages from Message List =====
+    function buildPagesFromMessages(){
       const container = document.getElementById('pagesContainer');
-      containerContainer');
-      container.innerHTML.innerHTML = '';
- = '';
-      autoPages      autoPages = = [];
-      if [];
-      if (!messages (!messages.length).length) return;
+      container.innerHTML = '';
+      autoPages = [];
+      if (!messages.length) return;
 
       // Page 1 (with header)
       let current = createAutoPage(true);
-      return;
-
-      // Page 1 (with header)
-      let current container.appendChild(current.frame);
-      attach = createAutoPage(true);
       container.appendChild(current.frame);
-      attachPagePageControls(container, 1, currentControls(container, 1,.frame);
-      autoPages.push(current current.frame);
-      autoPages);
+      attachPageControls(container, 1, current.frame);
+      autoPages.push(current);
 
-      // Add.push(current);
-
-      // Add messages; if overflow messages; if overflow, start new page (no header)
-      for, start new page (no header (let i=)
-      for (let i=0;i0;i<messages<messages.length;i++){
-        const msg.length;i++){
-        const msg = messages = messages[i[i];
-        appendAutoMessage];
+      // Add messages; if overflow, start new page (no header)
+      for (let i=0;i<messages.length;i++){
+        const msg = messages[i];
         appendAutoMessage(current.chatArea, msg);
-        if ((current.chatArea, msg);
-        if (current.chcurrent.chatArea.scrollatArea.scrollHeight > current.chatArea.clientHeight){
+        if (current.chatArea.scrollHeight > current.chatArea.clientHeight){
           // remove last group (overflowed)
-         Height > current.chatArea.clientHeight){
-          // remove last group (overflowed)
-          current.chat current.chatArea.removeChildArea.removeChild(current.chat(current.chatAreaArea.lastChild);
-          // new page (no.lastChild);
+          current.chatArea.removeChild(current.chatArea.lastChild);
           // new page (no header)
-          current = createAutoPage header)
-          current = createAutoPage(false(false);
+          current = createAutoPage(false);
           container.appendChild(current.frame);
           attachPageControls(container, autoPages.length+1, current.frame);
-          container.appendChild(current.frame);
-          attachPageControls(container, autoPages.length+1,);
           autoPages.push(current);
-          // current.frame);
-          autoPages.push(current);
-          // add the message to new add the message to new page page
-          appendAutoMessage(current.chatArea
+          // add the message to new page
           appendAutoMessage(current.chatArea, msg);
-, msg);
         }
       }
     }
 
-           }
-      }
-    }
-
-    function create function createAutoAutoPage(withHeaderPage(withHeader){
-      const frame = document){
+    function createAutoPage(withHeader){
       const frame = document.createElement('div');
-      frame.class.createElement('div');
-      frame.className = 'Name = 'phone-frame auto-page';
-      if (withHeaderphone-frame auto-page';
+      frame.className = 'phone-frame auto-page';
       if (withHeader){
-        frame.innerHTML =){
         frame.innerHTML = `
-          `
           <div class="chat-header">
-            <span class="back-arrow">← <div class="chat-header">
             <span class="back-arrow">←</span>
-</span>
-                       <img <img src="${document src="${document.getElementById('headerProfilePicImg').src}".getElementById('headerProfilePicImg').src}" class="header-profile">
- class="header-profile">
-                       <span class=" <span class="header-name">header-name">${document.getElementById('headerName').value}</span>
-${document.getElementById('headerName').value}</span>
+            <div style="position:relative; width:35px; height:35px;">
+              <div style="position:absolute; left:0; top:0; width:35px; height:35px; border-radius:50%; background:#A3A3A5;"></div>
+              <img src="${document.getElementById('headerProfilePicImg').src}" class="header-profile">
+            </div>
+            <span class="header-name">${document.getElementById('headerName').value}</span>
           </div>
-                   </div>
           <div class="chat-area"></div>`;
       } else {
-        frame <div class="chat-area"></div>`;
-      } else {
-.innerHTML = `<div class="chat-area no-header        frame.innerHTML = `<div class="chat-area no-header"></div>`;
+        frame.innerHTML = `<div class="chat-area no-header"></div>`;
       }
-     "></div>`;
-      }
-      return { frame return { frame, chatArea: frame, chatArea: frame.querySelector('.chat.querySelector('.chat-area')-area') };
-    };
+      return { frame, chatArea: frame.querySelector('.chat-area') };
     }
 
-    function appendAutoMessage(chatArea, }
-
     function appendAutoMessage(chatArea, msg){
-      msg){
-      const char const char = msg.character = msg.characterId ? savedCharacters.find(c=>cId ? savedCharacters.find(c=>c.id.id===msg.characterId) : null===msg.characterId) : null;
-      const;
-      const username username = char = char ? char.name : (msg.username || ' ? char.name : (msg.username || 'Character');
-      const profilePic =Character');
-      const profilePic = char char ? char.profilePic ? char.profilePic : (msg.profilePic || default : (msg.profilePic || defaultProfilePics.left);
-
-      const group =ProfilePics.left);
+      const char = msg.characterId ? savedCharacters.find(c=>c.id===msg.characterId) : null;
+      const username = char ? char.name : (msg.username || 'Character');
+      const profilePic = char ? char.profilePic : (msg.profilePic || defaultProfilePics.left);
 
       const group = document.createElement('div');
-      group.className document.createElement('div');
-      group.className = `message-group = `message-group ${ ${msg.align}`;
+      group.className = `message-group ${msg.align}`;
 
-msg.align}`;
-
-      if (      if (msg.showUsername){
+      if (msg.showUsername){
         const uname = document.createElement('div');
-msg.showUsername){
-        const uname = document.createElement('div');
-        uname.className        uname.className = 'username'; uname.textContent = 'username'; uname.textContent = username;
-        group.appendChild(uname = username;
+        uname.className = 'username'; uname.textContent = username;
         group.appendChild(uname);
       }
 
-      const row);
-      }
+      const row = document.createElement('div'); row.className = 'message-row';
+      const pWrap = document.createElement('div'); pWrap.className='profile-pic-wrap';
+      const pfp = document.createElement('img'); pfp.className='profile-pic'; pfp.src = profilePic; pWrap.appendChild(pfp);
+      row.appendChild(pWrap);
 
-      const row = document.createElement('div'); row.className = 'message-row = document.createElement('div'); row.className = 'message-row';
-';
-      const pfp = document      const pfp = document.createElement('.createElement('img');img'); pfp.className pfp.className='profile='profile-pic'; p-pic'; pfp.src = profilefp.src = profilePic; row.appendChildPic; row.appendChild(pfp(pfp);
-
-      const bubble);
-
-      const bubble = document = document.createElement('div'); bubble.className='message.createElement('div'); bubble.className='message';
-';
-      if (msg.text){ 
-        if (msg.isImagePlaceholder) {
-               if (msg.text){ 
-        if (msg.isImagePlaceholder) {
-          const placeholder const placeholder = document = document.createElement('.createElement('span');
-          placeholderspan');
-          placeholder.class.className = 'imageName = 'image-placeholder-placeholder';
-          placeholder';
-          placeholder.textContent.textContent = msg.text = msg.text;
-          placeholder.on;
-          placeholder.onclick =click = () => () => replace replaceImagePlaceholder(msgImagePlaceholder(msg.id);
-         .id);
-          bubble.appendChild bubble.appendChild(placeholder(placeholder);
-        });
-        } else {
-          bubble else {
-          bubble.textContent = msg.textContent = msg.text;.text; 
-        }
-      }
+      const bubble = document.createElement('div'); bubble.className='message';
+      if (msg.text){ bubble.textContent = msg.text; }
       if (msg.image){
-        
-        }
+        const im = document.createElement('img'); im.src = msg.image; im.className = 'message-image';
+        im.style.width = (msg.imageSize ? msg.imageSize+'px' : '200px');
+        bubble.appendChild(im);
       }
-      if (msg.image){
-        const im const im = document = document.createElement('img'); im.src.createElement('img'); im.src = msg.image; = msg.image; im.className = im.className = 'message-image res 'message-image resizable-imageizable-image'; bubble.appendChild('; bubble.appendChild(imim);
-);
+      if (msg.placeholderImage){
+        const ph = document.createElement('div'); ph.style.cssText='margin-top:8px;padding:8px;border-radius:8px;background:#222;color:#999;font-size:13px;text-align:center;';
+        ph.textContent = 'Add image';
+        bubble.appendChild(ph);
       }
-      row     .appendChild(b }
-      row.appendChild(bubbleubble);
-      group);
-      group.appendChild.appendChild(row);
-     (row);
+      row.appendChild(bubble);
+      group.appendChild(row);
       chatArea.appendChild(group);
     }
 
-    chatArea.appendChild(group);
+    function attachPageControls(container, pageNum, frameEl){
+      const ctrls = document.createElement('div');
+      ctrls.className = 'page-controls';
+      const btn = document.createElement('button');
+      btn.textContent = `Save Page ${pageNum} (PNG)`;
+      btn.onclick = ()=> downloadPageImage(pageNum-1);
+      ctrls.appendChild(btn);
+      container.appendChild(ctrls);
     }
 
-    function replaceImagePlaceholder(messageId) function replaceImagePlaceholder(messageId) {
-      const messageIndex {
-      const messageIndex = messages.findIndex(m => = messages.findIndex(m => m.id === messageId);
-      if (messageIndex === - m.id === messageId);
-      if (messageIndex === -1) return1) return;
-      
-     ;
-      
-      const fileInput = document const fileInput =.createElement('input document.createElement('input');
-     ');
-      fileInput.type = fileInput.type = 'file 'file';
-      fileInput.ac';
-      fileInput.accept = 'image/*';
-     cept = 'image/*';
-      fileInput.onchange = (e) => {
-        const file = e fileInput.onchange = (e) => {
-        const file = e.target.files.target.files[0[0];
-       ];
-        if (file) {
-          const if (file) reader = {
-          const reader = new new File FileReaderReader();
-          reader.on();
-          reader.onload = (event) =>load = (event) => {
-            messages[messageIndex].image = event.target {
-            messages[messageIndex].image = event.target.result;
-.result;
-            messages[messageIndex].text = '';
-                       messages[messageIndex].text = '';
-            messages[messageIndex]. messages[messageIndex].isImagePlaceisImagePlaceholderholder = false = false;
-            save;
-            saveData();
-            renderMessages();
-           Data();
-            renderMessages();
-            buildPagesFromMessages buildPagesFromMessages();
-         ();
-          };
-          };
-          reader.read reader.readAsDataURL(file);
-        }
-     AsDataURL(file);
-        }
-      };
-      };
-      fileInput.click fileInput.click();
+    function clearAllPages(){
+      document.getElementById('pagesContainer').innerHTML = '';
+      autoPages = [];
     }
 
-    function();
-    }
-
-    function attachPage attachPageControls(Controls(container, pageNumcontainer, pageNum, frame, frameEl){
-      constEl){
-      const ctr ctrls = document.createElementls = document.createElement('div('div');
-     ');
-      ctrls ctrls.class.className = 'Name = 'page-controlspage-controls';
-      const btn';
-      const btn = document.createElement(' = document.createElement('buttonbutton');
-      btn');
-      btn.textContent.textContent = ` = `Save PageSave Page ${pageNum} ${pageNum} (PN (PNG)`;
-     G)`;
-      btn.on btn.onclick =click = ()=> ()=> downloadPageImage downloadPageImage(pageNum-(pageNum-11);
-      c);
-      ctrlstrls.appendChild(btn.appendChild(btn);
-      container.appendChild();
-      container.appendChild(ctctrrls);
-   ls);
-    }
-
-    function }
-
-    function clearAll clearAllPages(){
-      documentPages(){
-      document.getElementById('.getElementById('pagesContainerpagesContainer').innerHTML = '';
-     ').innerHTML = '';
-      auto autoPages = [];
-Pages = [];
-       }
-
-    async function download }
-
-    async function downloadPagePageImage(indexImage(index){
-      const){
-      const page = page = autoPages autoPages[index];
-      if[index];
-      if (!page) return (! alert('page) return alert('Page notPage not found found.');
-      const canvas = await html2canvas.');
-      const canvas = await html(page.frame,2canvas(page.frame, {
-        backgroundColor:'# {
+    async function downloadPageImage(index){
+      const page = autoPages[index];
+      if (!page) return alert('Page not found.');
+      const canvas = await html2canvas(page.frame, {
         backgroundColor:'#121214',
-        scale:2121214',
-        scale:2, width:375, height:667,, width:375, height:667, useCORS:true, allowTaint:true
-      });
- useCORS:true, allowTaint:true
+        scale:2, width:375, height:667, useCORS:true, allowTaint:true
       });
       const a = document.createElement('a');
-      a.download = `frcg-page-      const a = document.createElement('a');
-      a.download = `frcg${index+1}.-page-${index+1}.pngpng`;
-`;
-      a      a.href = canvas.toDataURL(); a.click.href = canvas.toDataURL(); a.click();
-();
+      a.download = `frcg-page-${index+1}.png`;
+      a.href = canvas.toDataURL(); a.click();
     }
-
-    async function downloadAllImages    }
 
     async function downloadAllImages(){
-     (){
- if (!autoPages.length){
-        alert('No pages      if (!autoPages.length){
-        alert('No pages to export. Build pages first to export. Build pages first.');
-        return.');
+      if (!autoPages.length){
+        alert('No pages to export. Build pages first.');
         return;
-     ;
       }
-      for (let i }
-      for (let i=0=0;i;i<autoPages.length;i++){
-       <autoPages.length;i++){
-        const canvas = await const canvas = await html2 html2canvas(autocanvas(autoPages[i].frame,Pages[i]. {
-          backgroundColorframe, {
-         :'#121214',
-          scale: backgroundColor:'#121214',
-          scale:22, width:375,, width:375, height height:667, use:667, useCORS:true, allowTaint:trueCORS:true, allowTaint:true
+      for (let i=0;i<autoPages.length;i++){
+        const canvas = await html2canvas(autoPages[i].frame, {
+          backgroundColor:'#121214',
+          scale:2, width:375, height:667, useCORS:true, allowTaint:true
         });
-        const a = document
-        });
-        const a = document.createElement('.createElement('a');
-        a.download = `a');
-        a.download = `frcfrcg-page-${g-page-${i+1}.i+1}.pngpng`;
-        a.h`;
-        a.href = canvas.toDataURL();ref = canvas.toDataURL(); a.click();
-        // small delay helps a.click();
-        // small delay helps some browsers some browsers fire multiple downloads fire multiple downloads
-        //
-        // eslint-disable-next eslint-disable-next-line no-await-in-line no-await-in-loop
-        await new Promise(r=>setTimeout(r-loop
+        const a = document.createElement('a');
+        a.download = `frcg-page-${i+1}.png`;
+        a.href = canvas.toDataURL(); a.click();
+        // small delay helps some browsers fire multiple downloads
+        // eslint-disable-next-line no-await-in-loop
         await new Promise(r=>setTimeout(r,150));
-     ,150));
       }
     }
-    }
-
-    // = }
 
     // ===== Init =====
-    document.addEventListener==== Init =====
-    document.addEventListener('DOM('DOMContentLoaded', ()=>{
-ContentLoaded', ()=>{
-           loadData();
+    document.addEventListener('DOMContentLoaded', ()=>{
       loadData();
       renderCharacters();
       renderMessages();
 
-      renderCharacters();
-      renderMessages();
-
-      if (messages if (messages.length.length === === 0 0){
+      if (messages.length === 0){
         messages = [
-){
-        messages = [
-          { id:1, username:'jerriii          { id:1, username:'jerriiiii', textii',:'ye text:'yea?a?', align:'left', align:'left',  profilePic:defaultProfilePics.left, ',  profilePic:defaultProfilePics.left,  image image:null, showUsername:true, characterId::null, showUsername:true, characterId:null },
-          { id:2null },
-          { id:2, username:'You',       text:'i didnt know robl, username:'You',       text:'i didnt know roblox now has', align:'ox now has', align:'right', profilePic:right', profilePic:defaultProfilePics.right, image:null, showUsernamedefaultProfilePics.right, image:null, showUsername:true, characterId:null },
-          {:true, characterId:null },
-          { id:3, id:3, username username:'You',       text:'You',       text:'something like this', align:'right', profilePic:'something like this', align:'right', profilePic:defaultProfilePics.right, image::defaultProfilePics.right, image:null, shownull, showUsername:true, characterId:nullUsername:true, characterId:null },
-          },
-          { id:4, username:'You { id:4, username:'You',       text:'xD', align:'right', profilePic:defaultProfileP',       text:'xD', align:'right', profilePic:defaultProfilePics.right,ics.right, image:null, showUsername: image:null, showUsername:true,true, characterId:null characterId:null }
+          { id:1, username:'jerriiiii', text:'yea?', align:'left',  profilePic:defaultProfilePics.left,  image:null, imageSize:200, placeholderImage:false, showUsername:true, characterId:null },
+          { id:2, username:'You',       text:'i didnt know roblox now has', align:'right', profilePic:defaultProfilePics.right, image:null, imageSize:200, placeholderImage:false, showUsername:true, characterId:null },
+          { id:3, username:'You',       text:'something like this', align:'right', profilePic:defaultProfilePics.right, image:null, imageSize:200, placeholderImage:false, showUsername:true, characterId:null },
+          { id:4, username:'You',       text:'xD', align:'right', profilePic:defaultProfilePics.right, image:null, imageSize:200, placeholderImage:false, showUsername:true, characterId:null }
         ];
- }
-        ];
-        saveData        saveData(); render(); renderMessages();
-     Messages();
+        saveData(); renderMessages();
       }
 
-      // }
-
-      // Build initial pages based Build initial pages based on current messages on current messages
-      build
+      // Build initial pages based on current messages
       buildPagesFromMessages();
     });
- PagesFromMessages();
-    });
   </script>
-</body </script>
 </body>
 </html>
