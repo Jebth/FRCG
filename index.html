@@ -60,6 +60,7 @@
 
     .header-profile {
       width:35px; height:35px; border-radius:50%; margin-right:12px; object-fit:cover;
+      background-color: #A3A3A5; /* Chat header profile background */
     }
 
     .header-name { font-size:18px; font-weight:500; }
@@ -93,6 +94,7 @@
 
     .profile-pic {
       width:32px; height:32px; border-radius:50%; object-fit:cover; margin-right:8px; flex-shrink:0;
+      background-color: #D0D8FC; /* Chat message profile background */
     }
     .message-group.right .profile-pic { margin-right:0; margin-left:8px; }
 
@@ -172,6 +174,105 @@
       width:375px;
     }
 
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .modal {
+      background: #2a2a2a;
+      border-radius: 10px;
+      padding: 20px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .modal-preview {
+      margin: 15px 0;
+      padding: 10px;
+      background: #1a1a1a;
+      border-radius: 8px;
+    }
+
+    /* Loading screen */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      display: none;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Draggable messages */
+    .draggable {
+      cursor: move;
+    }
+
+    .dragging {
+      opacity: 0.5;
+    }
+
+    /* Image placeholder */
+    .image-placeholder {
+      color: #4a9eff;
+      cursor: pointer;
+      font-style: italic;
+    }
+
+    /* Resizable image */
+    .resizable-image {
+      resize: both;
+      overflow: hidden;
+      min-width: 100px;
+      min-height: 100px;
+      max-width: 300px;
+      max-height: 300px;
+    }
+
     @media (max-width:768px){
       body { flex-direction:column; }
       .controls { width:100%; height:300px; }
@@ -211,6 +312,10 @@
 Character 1: hey
 Character 2: sup?
 Character 1: nothing much"></textarea>
+      <div class="checkbox-group">
+        <input type="checkbox" id="useEmojis" checked />
+        <label for="useEmojis">Add Emojis (AI)</label>
+      </div>
       <button onclick="automateConversation()">Automate → Add to Message List</button>
     </div>
 
@@ -275,11 +380,42 @@ Character 1: nothing much"></textarea>
     <div class="pages-container" id="pagesContainer"></div>
   </div>
 
+  <!-- Modal for editing -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Edit Message</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-preview" id="modalPreview"></div>
+      <div class="control-group">
+        <textarea id="modalMessageText" placeholder="Message text" rows="3"></textarea>
+        <div class="file-input-wrapper">
+          <input type="file" id="modalMessageImage" class="file-input" accept="image/*"/>
+          <label for="modalMessageImage" class="file-input-label">Change Message Image</label>
+        </div>
+        <button onclick="saveModalChanges()">Save Changes</button>
+        <button onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading screen -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+      <svg fill="#1446FF" width="60px" height="60px" viewBox="0 0 14 14" role="img" focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <path d="m 7.7045134,12.849616 c -0.12125,-0.2182 -0.83621,-1.5326 -0.12164,-2.2363 -0.30786,-0.5698 -0.65918,-1.2154996 -0.83517,-1.5347996 -0.0415,-0.075 -0.0816,-0.1346 -0.0893,-0.1318 -0.0482,0.017 0.0147,0.2513 0.36132,1.3457996 0.17208,0.5435 0.28136,0.9068 0.32218,1.0713 0.0245,0.099 0.0285,0.1444 0.0282,0.3207 -3.3e-4,0.201 -0.0274,0.4271 -0.0552,0.4613 -0.006,0.01 -0.0231,0.012 -0.0381,0.01 -0.33991,-0.05 -1.05936,-0.199 -3.04403,-0.6307 -0.104,-0.023 -0.14988,-0.038 -0.15389,-0.051 -0.0118,-0.039 -1.15775,-5.4372996 -1.47252,-6.9364996 -0.135,-0.643 -0.42557,-2.0441 -0.43839,-2.1138 -0.007,-0.036 -0.005,-0.038 0.0378,-0.045 0.0627,-0.01 1.08294,-0.141 2.27802,-0.2926 0.55589,-0.07 1.17956,-0.1497 1.38593,-0.176 0.20638,-0.026 1.11057,-0.1405 2.0093,-0.2538 1.58362,-0.1998 3.5388506,-0.4481 3.9096706,-0.4965 0.86095,-0.1125 1.22192,-0.1573 1.28861,-0.1599 l 0.0782,0 0.0583,0.4237 c 0.0321,0.233 0.13415,0.971 0.22688,1.6401 0.34992,2.5247 0.53032,3.8993 0.57594,4.3883 l 0.008,0.085 -0.313,0.2426 c -0.39577,0.3067 -0.82747,0.6371 -1.07056,0.8193 l -0.18866,0.1415 -0.10184,0 c -0.21583,-10e-5 -0.81673,-0.033 -1.8811606,-0.1037 -0.6868,-0.045 -1.03543,-0.057 -1.04327,-0.034 -0.008,0.024 0.68396,0.6313 3.0041506,2.6358996 l 0.73836,0.638 0.1378,0.2748 c 0.15782,0.3149 0.20273,0.4234 0.18322,0.4429 -0.0177,0.018 -3.5023606,0.3355 -4.2609406,0.3886 -0.38845,0.027 -0.33282,0.044 -0.42946,-0.1299 z m -2.19857,-6.0306996 c 0.48603,-0.089 1.74243,-0.3434 2.12774,-0.4308 l 0.1712,-0.039 0.005,-0.044 c 0.0118,-0.095 -0.0234,-0.9543 -0.0519,-1.2663 -0.015,-0.165 -0.022,-0.1997 -0.04,-0.1998 -0.008,-1e-4 -0.14489,-0.019 -0.30467,-0.042 -0.15977,-0.023 -0.48114,-0.067 -0.71414,-0.098 -0.23301,-0.031 -0.62246,-0.082 -0.86546,-0.1144 -0.7463,-0.099 -1.08752,-0.1395 -1.09662,-0.1304 -0.0168,0.017 -0.0276,0.4331 -0.0283,1.0935 l -7.3e-4,0.6671 0.19224,0.2553 c 0.26144,0.3472 0.29857,0.3896 0.34125,0.3896 0.0188,0 0.13764,-0.019 0.26398,-0.042 z"/>
+      </svg>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     let messages = [];
     let savedCharacters = [];
     let autoPages = []; // [{frame, chatArea}]
+    let currentEditingMessage = null;
+    let isAutomating = false;
 
     // ===== OpenRouter / DeepSeek (optional) =====
     const OPENROUTER_API_KEY = "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";
@@ -289,6 +425,17 @@ Character 1: nothing much"></textarea>
       "Authorization":`Bearer ${OPENROUTER_API_KEY}`,
       "HTTP-Referer":"https://jebth.github.io/FRCG/",
       "X-Title":"FRCG - Fake Roblox Chat Generator"
+    };
+
+    // Emoji mapping for different emotions
+    const EMOJI_MAP = {
+      happy: ["😊", "😄", "😂", "😆", "🤣"],
+      sad: ["😢", "😭", "😔", "🥺", "😞"],
+      angry: ["😠", "😡", "🤬", "👿", "💢"],
+      surprised: ["😲", "😮", "🤯", "😳", "😱"],
+      love: ["😍", "🥰", "😘", "❤️", "💕"],
+      funny: ["🤣", "😝", "😜", "🤪", "🃏"],
+      neutral: ["🙂", "😐", "🤔", "👍", "👌"]
     };
 
     // ===== Local Storage =====
@@ -538,10 +685,27 @@ Character 1: nothing much"></textarea>
           } else {
             const sp = document.createElement('div'); sp.className='profile-pic'; sp.style.visibility='hidden'; row.appendChild(sp);
           }
-          const bubble = document.createElement('div'); bubble.className='message'; bubble.dataset.messageId = msg.id;
-          if (msg.text){ const t=document.createElement('span'); t.textContent = msg.text; bubble.appendChild(t); }
-          if (msg.image){ const im=document.createElement('img'); im.src=msg.image; im.className='message-image'; bubble.appendChild(im); }
-          row.appendChild(bubble); g.appendChild(row);
+          const bubble = document.createElement('div'); 
+          bubble.className='message'; 
+          bubble.dataset.messageId = msg.id;
+          bubble.draggable = true;
+          bubble.addEventListener('dragstart', handleDragStart);
+          bubble.addEventListener('dragend', handleDragEnd);
+          bubble.addEventListener('dblclick', () => openEditModal(msg.id));
+          
+          if (msg.text){ 
+            const t=document.createElement('span'); 
+            t.textContent = msg.text; 
+            bubble.appendChild(t); 
+          }
+          if (msg.image){ 
+            const im=document.createElement('img'); 
+            im.src=msg.image; 
+            im.className='message-image resizable-image'; 
+            bubble.appendChild(im); 
+          }
+          row.appendChild(bubble); 
+          g.appendChild(row);
         });
         chatArea.appendChild(g);
       });
@@ -554,286 +718,927 @@ Character 1: nothing much"></textarea>
         const displayName = char ? char.name : m.username;
         const item = document.createElement('div');
         item.className = 'message-item';
-        const label = m.text ? m.text.substring(0, 30) + (m.text.length>30?'…':'') : '[Image]';
+        const label = m.text ? m.text.substring(0, 30)) + (m.text.length + (m.text.length>30?'…':'') : '[Image]>30?'…':'') : '[Image]';
         item.innerHTML = `
-          <span>[${m.align.toUpperCase()}] ${displayName}: ${label}</span>
+          <span>[${m.align';
+        item.innerHTML = `
+          <span>[${m.align.toUpperCase()}] ${displayName}: ${.toUpperCase()}] ${displayName}: ${label}</span>
+          <label}</span>
           <div>
-            <button class="edit-btn" onclick="editMessage(${idx})">Edit</button>
-            <button class="delete-btn" onclick="deleteMessage(${idx})">Delete</button>
+            <button class="edit-btn" onclick="openEditModal($div>
+            <button class="edit-btn" onclick="openEditModal(${{m.id})">Edit</m.id})">Edit</button>
+            <button class="delete-btn" onclick="deleteMessagebutton>
+            <button class="delete-btn" onclick="deleteMessage(${(${idx})">Delete</button>
+          </div>idx})">Delete</button>
           </div>`;
+        messageList.appendChild`;
         messageList.appendChild(item);
+     (item);
       });
     }
 
-    function editMessage(index){
-      const m = messages[index];
-      const newText = prompt('Edit message text (leave blank to keep current):', m.text || '');
-      if (newText === null) return; // cancelled
-      // quick toggles
-      const toggleAlign = confirm(`Flip alignment? (OK = flip ${m.align} → ${m.align==='left'?'right':'left'}, Cancel = keep)`);
-      const toggleShowU = confirm(`Toggle "Show Username"? (OK = toggle, Cancel = keep)`);
+    function });
+    }
 
-      if (newText !== '') m.text = newText; // allow empty text if they set it to '' explicitly
-      if (toggleAlign) m.align = (m.align === 'left') ? 'right' : 'left';
-      if (toggleShowU) m.showUsername = !m.showUsername;
+    function openEditModal openEditModal(messageId)(messageId) {
+      const message {
+      const messageIndex = messages.findIndex(m => m.id === messageId);
+      if (messageIndex === -Index = messages.findIndex(m => m.id === messageId);
+      if (messageIndex === -1) return;
+      
+     1) return;
+      
+      currentEditingMessage = messageIndex;
+      const message currentEditingMessage = messageIndex;
+      const message = messages = messages[message[messageIndexIndex];
+      
+     ];
+      
+      // Update modal content
+      document.getElementById('modalMessageText').value = message // Update modal content
+      document.getElementById('modalMessageText').value = message.text || '';
+      document.getElementById('modalMessageImage').value = '';
+      
+.text || '';
+      document.getElementById('modalMessageImage').value = '';
+      
+           // Create preview
+      const modal // Create preview
+      const modalPreview = documentPreview = document.getElementById('modalPreview.getElementById('modalPreview');
+     ');
+      modalPreview.innerHTML modalPreview.innerHTML = '';
+      
+      const previewBubble = document.createElement('div');
+      = '';
+      
+      const previewBubble = document.createElement previewBubble.className =('div');
+      previewB `messageubble.className = `message ${message ${message.align.align === 'right === 'right' ? 'right' ? 'right' :' : ''}`;
+ ''}`;
+      
+      if (message      
+      if (message.text.text) {
+       ) {
+        const text const textSpan = document.createElementSpan = document.createElement('span');
+       ('span');
+        text textSpanSpan.textContent = message.text;
+        previewBubble.appendChild(textSpan);
+     .textContent = message.text;
+        previewBubble.appendChild(textSpan);
+      }
+      
+      if (message.image) {
+        const img = document.createElement(' }
+      
+      if (message.image) {
+        const img = document.createElement('img');
+       img');
+        img.src = img.src = message.image;
+        message.image;
+        img.className = 'message-image';
+        previewBubble.appendChild img.className = 'message-image';
+        previewBubble.appendChild(img(img);
+      }
+      
+      modalPreview);
+      }
+      
+      modalPreview.appendChild(pre.appendChild(previewBubbleviewBubble);
+      
+      // Show);
+      
+      // Show modal modal
+      document.getElementById('
+      document.getElementById('editModal').styleeditModal').style.display =.display = 'flex 'flex';
+   ';
+    }
 
-      saveData(); renderMessages(); buildPagesFromMessages();
+    function close }
+
+    function closeModal() {
+     Modal() {
+      document.getElementById document.getElementById('editModal').('editModal').style.display = 'style.display = 'none';
+      currentnone';
+      currentEditingMessage = null;
+    }
+
+    function saveModalChanges() {
+EditingMessage = null;
+    }
+
+    function saveModalChanges() {
+      if (currentEditingMessage === null      if (currentEditingMessage === null)) return;
+      
+      return;
+      
+      const newText = document.getElementById('modalMessageText').value;
+      const imageFile = document.getElementById const newText = document.getElementById('modalMessageText').value;
+      const imageFile = document('modalMessageImage').files[0];
+      
+      messages.getElementById('modalMessageImage').files[0];
+      
+      messages[currentEditing[currentEditingMessage].text =Message].text = newText;
+ newText;
+      
+      if (imageFile)      
+      if (imageFile) {
+        {
+        const reader const reader = new = new FileReader FileReader();
+       ();
+        reader.onload reader.onload = e => = e => {
+          messages[currentEditingMessage {
+          messages[currentEditingMessage].image].image = e.target = e.target.result;
+          save.result;
+          saveDataData();
+          renderMessages();
+          renderMessages();
+         ();
+          buildPages buildPagesFromMessages();
+          closeModalFromMessages();
+          closeModal();
+        };
+       ();
+        };
+        reader.readAsDataURL(image reader.readAsDataURL(imageFileFile);
+      });
+      } else else {
+        save {
+        saveData();
+Data();
+        renderMessages        renderMessages();
+        buildPagesFrom();
+        buildPagesFromMessages();
+        closeMessages();
+        closeModalModal();
+();
+      }
+         }
     }
 
     function deleteMessage(index){
-      messages.splice(index,1); saveData(); renderMessages(); buildPagesFromMessages();
+      messages.s }
+
+    function deleteMessage(index){
+      messages.splice(index,plice(index,1); saveData(); renderMessages(); buildPagesFromMessages();
+    }
+
+    function clearAllMessages1); saveData(); renderMessages(); buildPages(){
+      if (!confirm('ClearFromMessages();
     }
 
     function clearAllMessages(){
-      if (!confirm('Clear ALL messages?')) return;
-      messages = []; saveData(); renderMessages(); buildPagesFromMessages();
+      if (!confirm('Clear ALL messages ALL messages?')) return;
+      messages = []; save?')) return;
+      messages = []; saveDataData();(); renderMessages(); build renderMessages(); buildPagesFromMessages();
     }
+
+    // ===== Drag and Drop functionality =PagesFromMessages();
+    }
+
+    // ===== Drag and Drop functionality =========
+    let dragged
+    let draggedElementElement = null = null;
+
+    function handle;
+
+    functionDragStart(e) handleDragStart(e) {
+      draggedElement = e.target;
+      e.target.classList.add('dragging {
+      draggedElement = e.target;
+      e.target.classList.add('dragging');
+      e.data');
+      e.dataTransfer.effectAllowedTransfer.effectAllowed = 'move';
+      e.data = 'move';
+      e.dataTransfer.setDataTransfer('text.setData('text/plain', e/plain', e.target.target.dataset.messageId.dataset.messageId);
+    }
+
+   );
+    }
+
+    function function handleDragEnd(e handleDragEnd(e)) {
+      e {
+      e.target.classList.remove('dragging.target.classList.remove('dragging');
+    }
+
+   ');
+    }
+
+    function handleDragOver(e) function handleDragOver(e) {
+      e.preventDefault {
+      e.preventDefault();
+      e.data();
+      e.dataTransferTransfer.dropEffect = '.dropEffect = 'move';
+   move';
+    }
+
+    function handleDrop }
+
+    function handleDrop(e)(e) {
+      e.preventDefault {
+      e.preventDefault();
+      const messageId =();
+      const messageId parseInt(e.dataTransfer = parseInt(e.dataTransfer.getData.getData('text('text/plain'));
+      const target/plain'));
+      const targetMessage =Message = e e.target.closest('.message');
+.target.closest('.message      
+     ');
+      
+      if (!targetMessage || ! if (!targetMessage ||draggedElement) return;
+      
+      const targetId !draggedElement) return;
+      
+      const targetId = parseInt(targetMessage.dataset.message = parseInt(targetMessage.dataset.messageId);
+      if (messageId === targetId);
+      if (messageId === targetId)Id) return;
+ return;
+      
+      // Reorder messages      
+      // Reorder messages array
+      array
+      const fromIndex = const fromIndex = messages.find messages.findIndex(m => mIndex(m => m.id === messageId.id === messageId);
+      const to);
+      const toIndex =Index = messages.find messages.findIndex(mIndex(m => m.id === => m.id === target targetId);
+Id);
+      
+      if      
+      if (fromIndex === (fromIndex === -1 || to -1 || toIndexIndex === -1 === -1) return) return;
+      
+;
+      
+      const      const [movedMessage [movedMessage]] = messages.splice(from = messages.splice(fromIndex, 1Index, 1);
+      messages.s);
+      messages.splice(toIndex, 0, movedplice(toIndex, 0, movedMessageMessage);
+      
+      saveData();
+      renderMessages();
+      buildPagesFromMessages();
+   );
+      
+      saveData();
+      renderMessages();
+      buildPagesFromMessages();
+    }
+
+    }
+
+    // Add drop // Add drop event listeners event listeners to chat to chat area area
+    document
+    document.getElementById('chat.getElementById('chatArea').Area').addEventListener('draaddEventListener('dragovergover', handle', handleDragOver);
+   DragOver);
+    document.getElementById('chatArea').addEventListener('drop document.getElementById('chatArea').', handleDrop);
+
+    //addEventListener('drop', handleDrop);
 
     // ===== Manual single page PNG =====
+ ===== Manual single page PNG =====
     function downloadImage(){
-      const phoneFrame = document.getElementById('phoneFrame');
-      html2canvas(phoneFrame, {
-        backgroundColor:'#121214',
-        scale:2, width:375, height:667, useCORS:true, allowTaint:true
-      }).then(canvas=>{
-        const a = document.createElement('a');
-        a.download = 'roblox-chat-' + Date.now() + '.png';
+      const phoneFrame    function downloadImage(){
+      const phoneFrame = document.getElementById(' = document.getElementById('phoneFrame');
+phoneFrame');
+      html2canvas      html2canvas(phoneFrame(phoneFrame,, {
+        backgroundColor {
+        backgroundColor:'#:'#121214',
+       121214',
+        scale:2, scale:2, width: width:375,375, height: height:667, useC667, useCORSORS::truetrue, allowTaint:true, allowTaint:true
+      }).then(c
+      }).then(canvasanvas=>{
+        const=>{
+        const a = document.createElement a = document.createElement('a('a');
+       ');
+        a.d a.download = 'roblownload = 'roblox-chox-chat-' + Date.now() + '.png';
+        a.href = canvasat-' + Date.now() + '.png';
         a.href = canvas.toDataURL(); a.click();
-      }).catch(err=>{ console.error(err); alert('Error generating image.'); });
+      }).catch.toDataURL(); a.click();
+      }).catch(err=>{ console.error(err(err=>{ console.error(err); alert('Error generating image.'); });
     }
 
-    // ===== Automate: push into Message List (then build pages) =====
-    async function automateConversation(){
-      const script = document.getElementById('automateScript').value.trim();
-      if (!script) return alert('Paste a script first.');
+    //); alert('Error generating image.'); });
+    }
 
-      let parsed = null;
-      try {
-        const resp = await fetch(OPENROUTER_URL, {
-          method:'POST',
-          headers: OPENROUTER_HEADERS,
-          body: JSON.stringify({
-            model: "deepseek/deepseek-chat-v3-0324:free",
-            messages: [
-              { role:"system", content: [
-                "You format scripts into Roblox chat JSON.",
-                "Input: a script with lines like 'Name: message' or dialog blocks.",
-                "Output: ONLY valid JSON array (no code fences, no prose), like:",
-                `[{"character":"Character 1","text":"hello"},{"character":"Character 2","text":"hi!"}]`,
-                "If names are present, keep them; otherwise label as Character 1/2/3."
-              ].join("\n") },
-              { role:"user", content: script }
-            ],
-            temperature:0.2
-          })
-        });
-        const data = await resp.json();
-        let content = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
-        content = stripCodeFencesToJSON(content);
-        parsed = JSON.parse(content);
-        if (!Array.isArray(parsed)) throw new Error('Not an array');
-      } catch(e){
-        // fallback: local parse
-        parsed = localParseScript(script);
+    // ===== Enhanced ===== Enhanced AI Automation with Emoj AI Automation with Emojis =====is =====
+   
+    async function automateConversation(){
+ async function automateConversation(){
+           if (isAutomating) return;
+      isAutomating = true if (isAutomating) return;
+      isAutomating = true;
+      showLoading;
+      showLoadingScreen();
+      
+      const script = document.getElementByIdScreen();
+      
+      const script = document.getElementById('('automateautomateScript').value.trim();
+     Script').value.trim();
+      const const useEmojis = document.getElementById(' useEmojis = document.getElementById('useEmojisuseEmojis').checked;
+      
+').checked;
+      
+      if (!script      if (!script) {
+        hideLoadingScreen();
+       ) {
+        hideLoadingScreen();
+        isAutom isAutomating = falseating = false;
+        return alert(';
+        return alert('PPaste a script first.');
+     aste a script first.');
       }
 
-      // Map / create characters by name
-      const nameToId = {};
-      const nowBase = Date.now();
-      const unique = [];
-      parsed.forEach((line, i)=>{
-        const nm = (line.character || '').trim() || `Character ${i+1}`;
-        if (!unique.includes(nm)) unique.push(nm);
+      let }
+
+      let parsed = null parsed = null;
+;
+      try {
+        const      try {
+        const system systemPrompt = useEmPrompt = useEmojisojis ? ? 
+          `You format 
+          `You format scripts into scripts into Roblox chat JSON Roblox chat JSON with appropriate emoj with appropriate emojisis.
+          Input.
+          Input: a: a script with lines like ' script with lines like 'NameName: message' or: message' or dialog blocks dialog blocks.
+          Output: ONLY valid JSON array.
+          Output: ONLY valid JSON array (no code fences, no prose (no code fences, no prose), like:
+          [{"character":"Character), like:
+          [{"character":"Character 1","text":"hello 😊"},{"character":"Character  1","text":"hello 😊"},{"character":"Character 2","text2","text":"hi! 👋":"hi! 👋"}]
+         "}]
+          Add Add 1- 1-33 emoj emojis to messages where appropriate basedis to messages where appropriate based on emotion (happy, sad on emotion (happy, sad, angry, surprised, angry, surprised, love, funny, love, funny).
+          Don't add em).
+          Don't add emojis to every message -ojis to every message - only when it fits naturally.
+          If names are present, keep them; otherwise only when it fits naturally.
+          If names are present, keep them; otherwise label as Character label as Character 1 1/2/2/3.`/3.` :
+          :
+          `You format scripts into Rob `You format scripts into Roblox chat JSON.
+         lox chat JSON.
+          Input: a Input: a script with lines like 'Name: message script with lines like 'Name: message' or dialog blocks' or dialog blocks.
+         .
+          Output: Output: ONLY valid JSON array ONLY valid JSON array (no code fences, no (no code fences, no prose), like:
+          prose), like:
+          [{"character":"Character [{"character":"Character 1","text 1","text":"hello"},{"character":"hello"},{"character":"Character 2","":"Character 2","text":"hi!"}text":"hi!"}]
+          If names]
+          If names are are present, present, keep them; otherwise label as Character 1/2/3. keep them; otherwise label as Character 1/2/3.`;
+
+       `;
+
+        const resp = await fetch(OPENROUTER_URL, {
+          method:'POST',
+          headers const resp = await fetch(OPENROUTER_URL, {
+          method:'POST',
+         : headers: OPEN OPENROUTER_HEADERSROUTER_HEADERS,
+          body:,
+          body: JSON.stringify JSON.stringify({
+            model:({
+            model: "deep "deepseek/deepseek-chat-v3-seek/deepseek-chat-v3-0320324:4:freefree",
+            messages:",
+            messages: [
+              [
+              { role:" { role:"system",system", content: systemPrompt content: systemPrompt },
+              { role },
+              { role:"user", content: script:"user", content: script }
+            ],
+            }
+            ],
+            temperature:0. temperature:0.77
+          })
+       
+          })
+        });
+        const data });
+        const data = = await resp.json();
+ await resp.json();
+        let        let content = content = (data && (data && data.choices data.choices && data.choices && data.choices[0[0] && data.] && data.choiceschoices[0].message &&[0].message && data. data.choices[0].message.content) ||choices[0].message.content) || "";
+        content = stripCodeFencesToJSON(content);
+        "";
+        content = stripCodeFencesToJSON(content);
+        parsed = JSON.parse(content);
+ parsed = JSON.parse(content);
+        if (!Array.isArray(        if (!Array.isArray(parsedparsed)) throw new Error)) throw new Error('Not an array('Not an array');
+     ');
+      } catch(e } catch(e){
+        //){
+        // fallback: local fallback: local parse parse
+        parsed
+        parsed = localParseScript = localParseScript(script(script);
+      }
+
+     );
+      }
+
+      // Map / create // Map / create characters by name characters by name
+
+      const nameTo      const nameToId =Id = {};
+      const now {};
+      const nowBase = Date.nowBase = Date.now();
+     ();
+      const unique = const unique = [];
+      parsed.forEach(( [];
+      parsed.forEach((line,line, i i)=>{
+        const)=>{
+        const nm = nm = (line (line.character.character || || ''). '').trim() || `Character ${i+1}`trim;
+        if (!unique.includes(nm)) unique.push(n() || `Character ${i+1}`;
+        if (!unique.includes(nm)) uniquem);
       });
-      unique.forEach((nm, i)=>{
-        let existing = savedCharacters.find(c=>c.name.toLowerCase() === nm.toLowerCase());
+      unique.forEach((.push(nm);
+      });
+      unique.forEach((nm, inm, i)=>{
+        let)=>{
+        let existing = savedCharacters existing = savedCharacters.find(c=>c.find(c=>c.name.toLowerCase() === nm.name.toLowerCase() === nm.toLowerCase());
         if (!existing){
-          existing = { id: nowBase + i, name: nm, profilePic: defaultProfilePics.left };
+          existing = {.toLowerCase());
+        if (!existing){
+          existing = { id: nowBase + i, name id: nowBase + i, name: nm, profilePic: defaultProfile: nm, profilePic: defaultProfilePics.left };
           savedCharacters.push(existing);
         }
-        nameToId[nm] = existing.id;
+       Pics.left };
+          savedCharacters.push(existing);
+ nameTo        }
+        nameToId[nm]Id[nm = existing.id] = existing.id;
       });
 
-      // Push into Message List (alternate align)
+      // Check;
+      });
+
+      // Check for image placeholders for image placeholders
+      parsed.forEach
       parsed.forEach((line, i)=>{
-        const nm = (line.character || '').trim() || `Character ${i+1}`;
-        const cid = nameToId[nm];
-        messages.push({
-          id: nowBase + 1000 + i,
-          characterId: cid,
-          username: nm,
-          text: (line.text || '').toString(),
-          align: (i % 2 === 0) ? 'left' : 'right',
-          profilePic: defaultProfilePics[(i % 2 === 0) ? 'left' : 'right'],
-          image: null,
-          showUsername: true
-        });
+       ((line, i)=>{
+        if (line.text && if (line line.text.includes('.text && line.text.includes('Add image'))Add image')) {
+          // This {
+          // is an image placeholder This is an image placeholder
+          line.isImagePlaceholder = true
+          line.isImagePlaceholder = true;
+          line.text = 'Add image';
+;
+          line.text = 'Add image';
+        }
       });
 
-      saveData(); renderCharacters(); renderMessages(); buildPagesFromMessages();
+      // Push into Message List        }
+      });
+
+      // Push into Message List (alternate align (alternate align)
+      parsed.forEach(()
+      parsed.forEach((line, iline, i)=>{
+        const)=>{
+        const nm = ( nmline.character || '' = (line.character || '').trim).trim() ||() || `Character ${i `Character ${i++11}`}`;
+        const cid;
+        const cid = nameToId[nm];
+        
+ = nameToId[nm];
+        
+        const message = {
+          id: nowBase        const message = {
+          id: nowBase + 100 + 1000 + i,
+          characterId0 + i,
+          characterId: cid: cid,
+          username,
+         : nm username: nm,
+         ,
+          text: line.isImagePlace text: line.isImagePlaceholder ? 'Add image'holder ? 'Add image' : ( : (lineline.text || ''),
+          align:.text || ''),
+          align: (i %  (i % 2 ===2 === 0) ? 0) ? ' 'left'left' : 'right : 'right',
+          profilePic',
+          profilePic: defaultProfilePics[(i % 2 === : defaultProfilePics[(i % 2 === 0) ? 'left'0) ? 'left' : ' : 'rightright'],
+         '],
+          image: line.isImagePlaceholder ? null : image: line.isImagePlaceholder ? null : null null,
+         ,
+          showUsername: true,
+          is showUsername: true,
+          isImageImagePlaceholder:Placeholder: line.isImagePlace line.isImagePlaceholder || false
+        };
+
+        messages.push(message);
+     holder || false
+        };
+
+        messages.push(message);
+      });
+
+      saveData(); 
+      renderCharacters });
+
+      saveData(); 
+      renderCharacters(); 
+      renderMessages(); 
+     (); 
+      renderMessages(); 
+      buildPagesFromMessages();
+      hideLoadingScreen buildPagesFromMessages();
+      hideLoadingScreen();
+      isAutom();
+      isAutomatingating = false;
+    }
+
+    function stripCodeFencesTo = false;
     }
 
     function stripCodeFencesToJSON(s){
+      let str =JSON(s){
       let str = (s||'').trim();
-      if (str.startsWith('```')){
-        str = str.replace(/^```json/i,'```'); str = str.replace(/^```/,''); str = str.replace(/```$/,'');
+      if ( (s||'').trim();
+      if (str.startsWith('```'str.startsWith('```')){
+        str)){
+        str = str.replace = str.replace(/^```(/^```json/i,'```'); str = str.replace(/json/i,'```'); str = str.replace(/^```^```/,''); str = str.replace/,''); str = str.replace(/(/```$/,'```$/,'');
       }
-      const start = str.indexOf('['); const end = str.lastIndexOf(']');
-      if (start !== -1 && end !== -1 && end > start) str = str.substring(start, end+1);
-      return str.trim();
+      const start');
+      }
+      const start = str.indexOf('[' = str.indexOf('['); const end = str.lastIndexOf(']); const end = str.lastIndexOf(']');
+      if');
+      if ( (start !== -1 && end !== -start !== -1 && end !== -1 && end1 && end > start) str > start) str = str.substring(start, end+1);
+ = str.substring(start, end+1);
+           return str.trim();
+    }
+
+    function localParse return str.trim();
     }
 
     function localParseScript(script){
-      const lines = script.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
-      const out = []; let charIndex = 1;
+      const lines = scriptScript(script){
+      const lines = script.split(/\r?\.split(/\r?\n/).n/).map(l=>l.trimmap(l=>l.trim()).filter(Boolean);
+     ()).filter(Boolean);
+      const out const out = = []; let charIndex []; let charIndex =  = 11;
+      lines.forEach(l=>;
       lines.forEach(l=>{
-        const m = l.match(/^([^:]{1,50}):\s*(.+)$/);
+        const m = l.match{
+        const m = l.match(/^([^:]{(/^([^:]{1,50}1,50}):\s*(.+)$/);
         if (m) out.push({ character:m[1].trim(), text:m[2].trim() });
-        else { out.push({ character:`Character ${charIndex}`, text:l }); charIndex = (charIndex % 2) + 1; }
+        else { out.push({ character:`):\s*(.+)$/);
+        if (m) out.push({ character:m[1].trim(), text:m[2].trim() });
+        else { out.push({ character:`Character ${Character ${charIndex}charIndex}`, text`, text:l });:l }); charIndex = charIndex = (char (charIndex % 2) +Index % 2) + 1; 1; }
+ }
       });
+      return      });
       return out;
     }
 
-    // ===== Build static auto pages from Message List =====
-    function buildPagesFromMessages(){
+ out;
+       // ===== Loading Screen }
+
+    // ===== Loading Screen =====
+    =====
+    function show function showLoadingScreen() {
+     LoadingScreen() {
+      document.getElementById(' document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+
+    function hideLoadingloadingOverlay').style.display = 'flex';
+    }
+
+    function hideLoadingScreen() {
+     Screen() {
+      document document.getElementById('loadingOverlay.getElementById('loadingOverlay').style.display = 'none').style.display =';
+    'none';
+    }
+
+    }
+
+    // = // ===== Build==== Build static auto pages from static auto pages from Message List Message List =====
+    =====
+    function function build buildPagesFromMessages(){
+      const container = document.getElementById('pagesPagesFromMessages(){
       const container = document.getElementById('pagesContainer');
-      container.innerHTML = '';
-      autoPages = [];
-      if (!messages.length) return;
+      containerContainer');
+      container.innerHTML.innerHTML = '';
+ = '';
+      autoPages      autoPages = = [];
+      if [];
+      if (!messages (!messages.length).length) return;
 
       // Page 1 (with header)
       let current = createAutoPage(true);
-      container.appendChild(current.frame);
-      attachPageControls(container, 1, current.frame);
-      autoPages.push(current);
+      return;
 
-      // Add messages; if overflow, start new page (no header)
-      for (let i=0;i<messages.length;i++){
-        const msg = messages[i];
+      // Page 1 (with header)
+      let current container.appendChild(current.frame);
+      attach = createAutoPage(true);
+      container.appendChild(current.frame);
+      attachPagePageControls(container, 1, currentControls(container, 1,.frame);
+      autoPages.push(current current.frame);
+      autoPages);
+
+      // Add.push(current);
+
+      // Add messages; if overflow messages; if overflow, start new page (no header)
+      for, start new page (no header (let i=)
+      for (let i=0;i0;i<messages<messages.length;i++){
+        const msg.length;i++){
+        const msg = messages = messages[i[i];
+        appendAutoMessage];
         appendAutoMessage(current.chatArea, msg);
-        if (current.chatArea.scrollHeight > current.chatArea.clientHeight){
+        if ((current.chatArea, msg);
+        if (current.chcurrent.chatArea.scrollatArea.scrollHeight > current.chatArea.clientHeight){
           // remove last group (overflowed)
-          current.chatArea.removeChild(current.chatArea.lastChild);
+         Height > current.chatArea.clientHeight){
+          // remove last group (overflowed)
+          current.chat current.chatArea.removeChildArea.removeChild(current.chat(current.chatAreaArea.lastChild);
+          // new page (no.lastChild);
           // new page (no header)
-          current = createAutoPage(false);
+          current = createAutoPage header)
+          current = createAutoPage(false(false);
           container.appendChild(current.frame);
           attachPageControls(container, autoPages.length+1, current.frame);
+          container.appendChild(current.frame);
+          attachPageControls(container, autoPages.length+1,);
           autoPages.push(current);
-          // add the message to new page
+          // current.frame);
+          autoPages.push(current);
+          // add the message to new add the message to new page page
+          appendAutoMessage(current.chatArea
           appendAutoMessage(current.chatArea, msg);
+, msg);
         }
       }
     }
 
-    function createAutoPage(withHeader){
-      const frame = document.createElement('div');
-      frame.className = 'phone-frame auto-page';
-      if (withHeader){
-        frame.innerHTML = `
-          <div class="chat-header">
-            <span class="back-arrow">←</span>
-            <img src="${document.getElementById('headerProfilePicImg').src}" class="header-profile">
-            <span class="header-name">${document.getElementById('headerName').value}</span>
-          </div>
-          <div class="chat-area"></div>`;
-      } else {
-        frame.innerHTML = `<div class="chat-area no-header"></div>`;
+           }
       }
-      return { frame, chatArea: frame.querySelector('.chat-area') };
     }
 
+    function create function createAutoAutoPage(withHeaderPage(withHeader){
+      const frame = document){
+      const frame = document.createElement('div');
+      frame.class.createElement('div');
+      frame.className = 'Name = 'phone-frame auto-page';
+      if (withHeaderphone-frame auto-page';
+      if (withHeader){
+        frame.innerHTML =){
+        frame.innerHTML = `
+          `
+          <div class="chat-header">
+            <span class="back-arrow">← <div class="chat-header">
+            <span class="back-arrow">←</span>
+</span>
+                       <img <img src="${document src="${document.getElementById('headerProfilePicImg').src}".getElementById('headerProfilePicImg').src}" class="header-profile">
+ class="header-profile">
+                       <span class=" <span class="header-name">header-name">${document.getElementById('headerName').value}</span>
+${document.getElementById('headerName').value}</span>
+          </div>
+                   </div>
+          <div class="chat-area"></div>`;
+      } else {
+        frame <div class="chat-area"></div>`;
+      } else {
+.innerHTML = `<div class="chat-area no-header        frame.innerHTML = `<div class="chat-area no-header"></div>`;
+      }
+     "></div>`;
+      }
+      return { frame return { frame, chatArea: frame, chatArea: frame.querySelector('.chat.querySelector('.chat-area')-area') };
+    };
+    }
+
+    function appendAutoMessage(chatArea, }
+
     function appendAutoMessage(chatArea, msg){
-      const char = msg.characterId ? savedCharacters.find(c=>c.id===msg.characterId) : null;
-      const username = char ? char.name : (msg.username || 'Character');
-      const profilePic = char ? char.profilePic : (msg.profilePic || defaultProfilePics.left);
+      msg){
+      const char const char = msg.character = msg.characterId ? savedCharacters.find(c=>cId ? savedCharacters.find(c=>c.id.id===msg.characterId) : null===msg.characterId) : null;
+      const;
+      const username username = char = char ? char.name : (msg.username || ' ? char.name : (msg.username || 'Character');
+      const profilePic =Character');
+      const profilePic = char char ? char.profilePic ? char.profilePic : (msg.profilePic || default : (msg.profilePic || defaultProfilePics.left);
+
+      const group =ProfilePics.left);
 
       const group = document.createElement('div');
-      group.className = `message-group ${msg.align}`;
+      group.className document.createElement('div');
+      group.className = `message-group = `message-group ${ ${msg.align}`;
 
-      if (msg.showUsername){
+msg.align}`;
+
+      if (      if (msg.showUsername){
         const uname = document.createElement('div');
-        uname.className = 'username'; uname.textContent = username;
+msg.showUsername){
+        const uname = document.createElement('div');
+        uname.className        uname.className = 'username'; uname.textContent = 'username'; uname.textContent = username;
+        group.appendChild(uname = username;
         group.appendChild(uname);
       }
 
-      const row = document.createElement('div'); row.className = 'message-row';
-      const pfp = document.createElement('img'); pfp.className='profile-pic'; pfp.src = profilePic; row.appendChild(pfp);
-
-      const bubble = document.createElement('div'); bubble.className='message';
-      if (msg.text){ bubble.textContent = msg.text; }
-      if (msg.image){
-        const im = document.createElement('img'); im.src = msg.image; im.className = 'message-image'; bubble.appendChild(im);
+      const row);
       }
-      row.appendChild(bubble);
-      group.appendChild(row);
+
+      const row = document.createElement('div'); row.className = 'message-row = document.createElement('div'); row.className = 'message-row';
+';
+      const pfp = document      const pfp = document.createElement('.createElement('img');img'); pfp.className pfp.className='profile='profile-pic'; p-pic'; pfp.src = profilefp.src = profilePic; row.appendChildPic; row.appendChild(pfp(pfp);
+
+      const bubble);
+
+      const bubble = document = document.createElement('div'); bubble.className='message.createElement('div'); bubble.className='message';
+';
+      if (msg.text){ 
+        if (msg.isImagePlaceholder) {
+               if (msg.text){ 
+        if (msg.isImagePlaceholder) {
+          const placeholder const placeholder = document = document.createElement('.createElement('span');
+          placeholderspan');
+          placeholder.class.className = 'imageName = 'image-placeholder-placeholder';
+          placeholder';
+          placeholder.textContent.textContent = msg.text = msg.text;
+          placeholder.on;
+          placeholder.onclick =click = () => () => replace replaceImagePlaceholder(msgImagePlaceholder(msg.id);
+         .id);
+          bubble.appendChild bubble.appendChild(placeholder(placeholder);
+        });
+        } else {
+          bubble else {
+          bubble.textContent = msg.textContent = msg.text;.text; 
+        }
+      }
+      if (msg.image){
+        
+        }
+      }
+      if (msg.image){
+        const im const im = document = document.createElement('img'); im.src.createElement('img'); im.src = msg.image; = msg.image; im.className = im.className = 'message-image res 'message-image resizable-imageizable-image'; bubble.appendChild('; bubble.appendChild(imim);
+);
+      }
+      row     .appendChild(b }
+      row.appendChild(bubbleubble);
+      group);
+      group.appendChild.appendChild(row);
+     (row);
       chatArea.appendChild(group);
     }
 
-    function attachPageControls(container, pageNum, frameEl){
-      const ctrls = document.createElement('div');
-      ctrls.className = 'page-controls';
-      const btn = document.createElement('button');
-      btn.textContent = `Save Page ${pageNum} (PNG)`;
-      btn.onclick = ()=> downloadPageImage(pageNum-1);
-      ctrls.appendChild(btn);
-      container.appendChild(ctrls);
+    chatArea.appendChild(group);
     }
 
-    function clearAllPages(){
-      document.getElementById('pagesContainer').innerHTML = '';
-      autoPages = [];
+    function replaceImagePlaceholder(messageId) function replaceImagePlaceholder(messageId) {
+      const messageIndex {
+      const messageIndex = messages.findIndex(m => = messages.findIndex(m => m.id === messageId);
+      if (messageIndex === - m.id === messageId);
+      if (messageIndex === -1) return1) return;
+      
+     ;
+      
+      const fileInput = document const fileInput =.createElement('input document.createElement('input');
+     ');
+      fileInput.type = fileInput.type = 'file 'file';
+      fileInput.ac';
+      fileInput.accept = 'image/*';
+     cept = 'image/*';
+      fileInput.onchange = (e) => {
+        const file = e fileInput.onchange = (e) => {
+        const file = e.target.files.target.files[0[0];
+       ];
+        if (file) {
+          const if (file) reader = {
+          const reader = new new File FileReaderReader();
+          reader.on();
+          reader.onload = (event) =>load = (event) => {
+            messages[messageIndex].image = event.target {
+            messages[messageIndex].image = event.target.result;
+.result;
+            messages[messageIndex].text = '';
+                       messages[messageIndex].text = '';
+            messages[messageIndex]. messages[messageIndex].isImagePlaceisImagePlaceholderholder = false = false;
+            save;
+            saveData();
+            renderMessages();
+           Data();
+            renderMessages();
+            buildPagesFromMessages buildPagesFromMessages();
+         ();
+          };
+          };
+          reader.read reader.readAsDataURL(file);
+        }
+     AsDataURL(file);
+        }
+      };
+      };
+      fileInput.click fileInput.click();
     }
 
-    async function downloadPageImage(index){
-      const page = autoPages[index];
-      if (!page) return alert('Page not found.');
-      const canvas = await html2canvas(page.frame, {
+    function();
+    }
+
+    function attachPage attachPageControls(Controls(container, pageNumcontainer, pageNum, frame, frameEl){
+      constEl){
+      const ctr ctrls = document.createElementls = document.createElement('div('div');
+     ');
+      ctrls ctrls.class.className = 'Name = 'page-controlspage-controls';
+      const btn';
+      const btn = document.createElement(' = document.createElement('buttonbutton');
+      btn');
+      btn.textContent.textContent = ` = `Save PageSave Page ${pageNum} ${pageNum} (PN (PNG)`;
+     G)`;
+      btn.on btn.onclick =click = ()=> ()=> downloadPageImage downloadPageImage(pageNum-(pageNum-11);
+      c);
+      ctrlstrls.appendChild(btn.appendChild(btn);
+      container.appendChild();
+      container.appendChild(ctctrrls);
+   ls);
+    }
+
+    function }
+
+    function clearAll clearAllPages(){
+      documentPages(){
+      document.getElementById('.getElementById('pagesContainerpagesContainer').innerHTML = '';
+     ').innerHTML = '';
+      auto autoPages = [];
+Pages = [];
+       }
+
+    async function download }
+
+    async function downloadPagePageImage(indexImage(index){
+      const){
+      const page = page = autoPages autoPages[index];
+      if[index];
+      if (!page) return (! alert('page) return alert('Page notPage not found found.');
+      const canvas = await html2canvas.');
+      const canvas = await html(page.frame,2canvas(page.frame, {
+        backgroundColor:'# {
         backgroundColor:'#121214',
-        scale:2, width:375, height:667, useCORS:true, allowTaint:true
+        scale:2121214',
+        scale:2, width:375, height:667,, width:375, height:667, useCORS:true, allowTaint:true
+      });
+ useCORS:true, allowTaint:true
       });
       const a = document.createElement('a');
-      a.download = `frcg-page-${index+1}.png`;
-      a.href = canvas.toDataURL(); a.click();
+      a.download = `frcg-page-      const a = document.createElement('a');
+      a.download = `frcg${index+1}.-page-${index+1}.pngpng`;
+`;
+      a      a.href = canvas.toDataURL(); a.click.href = canvas.toDataURL(); a.click();
+();
     }
+
+    async function downloadAllImages    }
 
     async function downloadAllImages(){
-      if (!autoPages.length){
-        alert('No pages to export. Build pages first.');
+     (){
+ if (!autoPages.length){
+        alert('No pages      if (!autoPages.length){
+        alert('No pages to export. Build pages first to export. Build pages first.');
+        return.');
         return;
+     ;
       }
-      for (let i=0;i<autoPages.length;i++){
-        const canvas = await html2canvas(autoPages[i].frame, {
-          backgroundColor:'#121214',
-          scale:2, width:375, height:667, useCORS:true, allowTaint:true
+      for (let i }
+      for (let i=0=0;i;i<autoPages.length;i++){
+       <autoPages.length;i++){
+        const canvas = await const canvas = await html2 html2canvas(autocanvas(autoPages[i].frame,Pages[i]. {
+          backgroundColorframe, {
+         :'#121214',
+          scale: backgroundColor:'#121214',
+          scale:22, width:375,, width:375, height height:667, use:667, useCORS:true, allowTaint:trueCORS:true, allowTaint:true
         });
-        const a = document.createElement('a');
-        a.download = `frcg-page-${i+1}.png`;
-        a.href = canvas.toDataURL(); a.click();
-        // small delay helps some browsers fire multiple downloads
-        // eslint-disable-next-line no-await-in-loop
+        const a = document
+        });
+        const a = document.createElement('.createElement('a');
+        a.download = `a');
+        a.download = `frcfrcg-page-${g-page-${i+1}.i+1}.pngpng`;
+        a.h`;
+        a.href = canvas.toDataURL();ref = canvas.toDataURL(); a.click();
+        // small delay helps a.click();
+        // small delay helps some browsers some browsers fire multiple downloads fire multiple downloads
+        //
+        // eslint-disable-next eslint-disable-next-line no-await-in-line no-await-in-loop
+        await new Promise(r=>setTimeout(r-loop
         await new Promise(r=>setTimeout(r,150));
+     ,150));
       }
     }
+    }
+
+    // = }
 
     // ===== Init =====
-    document.addEventListener('DOMContentLoaded', ()=>{
+    document.addEventListener==== Init =====
+    document.addEventListener('DOM('DOMContentLoaded', ()=>{
+ContentLoaded', ()=>{
+           loadData();
       loadData();
       renderCharacters();
       renderMessages();
 
-      if (messages.length === 0){
+      renderCharacters();
+      renderMessages();
+
+      if (messages if (messages.length.length === === 0 0){
         messages = [
-          { id:1, username:'jerriiiii', text:'yea?', align:'left',  profilePic:defaultProfilePics.left,  image:null, showUsername:true, characterId:null },
-          { id:2, username:'You',       text:'i didnt know roblox now has', align:'right', profilePic:defaultProfilePics.right, image:null, showUsername:true, characterId:null },
-          { id:3, username:'You',       text:'something like this', align:'right', profilePic:defaultProfilePics.right, image:null, showUsername:true, characterId:null },
-          { id:4, username:'You',       text:'xD', align:'right', profilePic:defaultProfilePics.right, image:null, showUsername:true, characterId:null }
+){
+        messages = [
+          { id:1, username:'jerriii          { id:1, username:'jerriiiii', textii',:'ye text:'yea?a?', align:'left', align:'left',  profilePic:defaultProfilePics.left, ',  profilePic:defaultProfilePics.left,  image image:null, showUsername:true, characterId::null, showUsername:true, characterId:null },
+          { id:2null },
+          { id:2, username:'You',       text:'i didnt know robl, username:'You',       text:'i didnt know roblox now has', align:'ox now has', align:'right', profilePic:right', profilePic:defaultProfilePics.right, image:null, showUsernamedefaultProfilePics.right, image:null, showUsername:true, characterId:null },
+          {:true, characterId:null },
+          { id:3, id:3, username username:'You',       text:'You',       text:'something like this', align:'right', profilePic:'something like this', align:'right', profilePic:defaultProfilePics.right, image::defaultProfilePics.right, image:null, shownull, showUsername:true, characterId:nullUsername:true, characterId:null },
+          },
+          { id:4, username:'You { id:4, username:'You',       text:'xD', align:'right', profilePic:defaultProfileP',       text:'xD', align:'right', profilePic:defaultProfilePics.right,ics.right, image:null, showUsername: image:null, showUsername:true,true, characterId:null characterId:null }
         ];
-        saveData(); renderMessages();
+ }
+        ];
+        saveData        saveData(); render(); renderMessages();
+     Messages();
       }
 
-      // Build initial pages based on current messages
+      // }
+
+      // Build initial pages based Build initial pages based on current messages on current messages
+      build
       buildPagesFromMessages();
     });
+ PagesFromMessages();
+    });
   </script>
+</body </script>
 </body>
 </html>
