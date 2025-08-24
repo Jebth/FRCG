@@ -77,17 +77,6 @@
             font-weight: 500;
         }
         
-        .start-btn {
-            position: absolute;
-            right: 20px;
-            background: #4a4a4a;
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            color: white;
-            border: none;
-        }
-        
         .chat-area {
             height: calc(100% - 70px);
             overflow-y: auto;
@@ -142,13 +131,6 @@
             font-size: 15px;
             line-height: 1.4;
             position: relative;
-            cursor: move;
-        }
-        
-        .message.dragging {
-            opacity: 0.7;
-            transform: scale(1.05);
-            z-index: 1000;
         }
         
         .message-image {
@@ -282,7 +264,22 @@
         </div>
         
         <div class="control-group">
+            <h3>Saved Characters</h3>
+            <input type="text" id="characterName" placeholder="Character name">
+            <div class="file-input-wrapper">
+                <input type="file" id="characterProfilePic" class="file-input" accept="image/*">
+                <label for="characterProfilePic" class="file-input-label">Upload Character Profile Picture</label>
+            </div>
+            <button onclick="saveCharacter()">Save Character</button>
+            <div class="message-list" id="characterList"></div>
+            <button onclick="clearAllCharacters()">Clear All Characters</button>
+        </div>
+        
+        <div class="control-group">
             <h3>Add Message</h3>
+            <select id="characterSelect">
+                <option value="">Select saved character or type custom</option>
+            </select>
             <input type="text" id="messageUsername" placeholder="Username" value="jerriiiii">
             <textarea id="messageText" placeholder="Message text" rows="3"></textarea>
             <select id="messageAlign">
@@ -291,7 +288,7 @@
             </select>
             <div class="file-input-wrapper">
                 <input type="file" id="messageProfilePic" class="file-input" accept="image/*">
-                <label for="messageProfilePic" class="file-input-label">Upload Profile Picture</label>
+                <label for="messageProfilePic" class="file-input-label">Upload Profile Picture (Override)</label>
             </div>
             <div class="file-input-wrapper">
                 <input type="file" id="messageImage" class="file-input" accept="image/*">
@@ -318,7 +315,6 @@
                 <span class="back-arrow">←</span>
                 <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM2NjY2NjYiLz4KPHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeD0iNiIgeT0iNiI+CjxwYXRoIGQ9Ik0xMCAyQzE0LjQxODMgMiAxOCA1LjU4MTcgMTggMTBDMTggMTQuNDE4MyAxNC40MTgzIDE4IDEwIDE4QzUuNTgxNyAxOCAyIDE0LjQxODMgMiAxMEMyIDUuNTgxNyA1LjU4MTcgMiAxMCAyWiIgZmlsbD0iIzQ0NEE1NCIvPgo8L3N2Zz4KPC9zdmc+Cg==" class="header-profile" id="headerProfilePicImg">
                 <span class="header-name" id="headerNameSpan">Akaku</span>
-                <button class="start-btn">🎮 Start</button>
             </div>
             <div class="chat-area" id="chatArea"></div>
         </div>
@@ -327,8 +323,45 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         let messages = [];
-        let draggedElement = null;
-        let dragOffset = { x: 0, y: 0 };
+        let savedCharacters = [];
+        
+        // Load data from localStorage on page load
+        function loadData() {
+            const savedMessages = localStorage.getItem('roblox-chat-messages');
+            const savedChars = localStorage.getItem('roblox-chat-characters');
+            const savedHeader = localStorage.getItem('roblox-chat-header');
+            
+            if (savedMessages) {
+                messages = JSON.parse(savedMessages);
+            }
+            
+            if (savedChars) {
+                savedCharacters = JSON.parse(savedChars);
+            }
+            
+            if (savedHeader) {
+                const headerData = JSON.parse(savedHeader);
+                document.getElementById('headerName').value = headerData.name;
+                document.getElementById('headerNameSpan').textContent = headerData.name;
+                if (headerData.profilePic) {
+                    document.getElementById('headerProfilePicImg').src = headerData.profilePic;
+                }
+            }
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('roblox-chat-messages', JSON.stringify(messages));
+            localStorage.setItem('roblox-chat-characters', JSON.stringify(savedCharacters));
+        }
+        
+        function saveHeaderData() {
+            const headerData = {
+                name: document.getElementById('headerName').value,
+                profilePic: document.getElementById('headerProfilePicImg').src
+            };
+            localStorage.setItem('roblox-chat-header', JSON.stringify(headerData));
+        }
         
         // Default profile pictures
         const defaultProfilePics = {
@@ -343,6 +376,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     document.getElementById('headerProfilePicImg').src = e.target.result;
+                    saveHeaderData();
                 };
                 reader.readAsDataURL(file);
             }
@@ -351,9 +385,98 @@
         // Header name update
         document.getElementById('headerName').addEventListener('input', function(e) {
             document.getElementById('headerNameSpan').textContent = e.target.value;
+            saveHeaderData();
         });
         
+        // Character selection
+        document.getElementById('characterSelect').addEventListener('change', function(e) {
+            const selectedChar = savedCharacters.find(char => char.id == e.target.value);
+            if (selectedChar) {
+                document.getElementById('messageUsername').value = selectedChar.name;
+                // Clear any custom profile pic since we'll use the saved character's pic
+                document.getElementById('messageProfilePic').value = '';
+            }
+        });
+        
+        function saveCharacter() {
+            const name = document.getElementById('characterName').value;
+            const profilePicFile = document.getElementById('characterProfilePic').files[0];
+            
+            if (!name) {
+                alert('Please enter a character name');
+                return;
+            }
+            
+            if (!profilePicFile) {
+                alert('Please upload a profile picture for the character');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const character = {
+                    id: Date.now(),
+                    name: name,
+                    profilePic: e.target.result
+                };
+                
+                savedCharacters.push(character);
+                saveData();
+                renderCharacters();
+                clearCharacterInputs();
+            };
+            reader.readAsDataURL(profilePicFile);
+        }
+        
+        function clearCharacterInputs() {
+            document.getElementById('characterName').value = '';
+            document.getElementById('characterProfilePic').value = '';
+        }
+        
+        function renderCharacters() {
+            const characterList = document.getElementById('characterList');
+            const characterSelect = document.getElementById('characterSelect');
+            
+            // Update character list
+            characterList.innerHTML = '';
+            savedCharacters.forEach((char, index) => {
+                const item = document.createElement('div');
+                item.className = 'message-item';
+                item.innerHTML = `
+                    <span>${char.name}</span>
+                    <button class="delete-btn" onclick="deleteCharacter(${index})">Delete</button>
+                `;
+                characterList.appendChild(item);
+            });
+            
+            // Update character select dropdown
+            characterSelect.innerHTML = '<option value="">Select saved character or type custom</option>';
+            savedCharacters.forEach(char => {
+                const option = document.createElement('option');
+                option.value = char.id;
+                option.textContent = char.name;
+                characterSelect.appendChild(option);
+            });
+        }
+        
+        function deleteCharacter(index) {
+            if (confirm('Are you sure you want to delete this character?')) {
+                savedCharacters.splice(index, 1);
+                saveData();
+                renderCharacters();
+            }
+        }
+        
+        function clearAllCharacters() {
+            if (confirm('Are you sure you want to clear all saved characters?')) {
+                savedCharacters = [];
+                saveData();
+                renderCharacters();
+            }
+        }
+        
         function addMessage() {
+            const selectedCharId = document.getElementById('characterSelect').value;
             const username = document.getElementById('messageUsername').value || 'User';
             const text = document.getElementById('messageText').value;
             const align = document.getElementById('messageAlign').value;
@@ -374,9 +497,17 @@
                 image: null
             };
             
+            // Use saved character's profile pic if selected and no override provided
+            if (selectedCharId && !profilePicFile) {
+                const selectedChar = savedCharacters.find(char => char.id == selectedCharId);
+                if (selectedChar) {
+                    message.profilePic = selectedChar.profilePic;
+                }
+            }
+            
             const promises = [];
             
-            // Handle profile picture
+            // Handle profile picture override
             if (profilePicFile) {
                 promises.push(new Promise((resolve) => {
                     const reader = new FileReader();
@@ -402,6 +533,7 @@
             
             Promise.all(promises).then(() => {
                 messages.push(message);
+                saveData();
                 renderMessages();
                 clearInputs();
             });
@@ -411,6 +543,7 @@
             document.getElementById('messageText').value = '';
             document.getElementById('messageProfilePic').value = '';
             document.getElementById('messageImage').value = '';
+            document.getElementById('characterSelect').value = '';
         }
         
         function renderMessages() {
@@ -461,7 +594,6 @@
                     const messageBubble = document.createElement('div');
                     messageBubble.className = 'message';
                     messageBubble.dataset.messageId = msg.id;
-                    messageBubble.addEventListener('mousedown', startDrag);
                     
                     if (msg.text) {
                         const textSpan = document.createElement('span');
@@ -497,7 +629,7 @@
                 const item = document.createElement('div');
                 item.className = 'message-item';
                 item.innerHTML = `
-                    <span>${msg.username}: ${msg.text ? msg.text.substring(0, 20) + (msg.text.length > 20 ? '...' : '') : '[Image]'}</span>
+                    <span>[${msg.align.toUpperCase()}] ${msg.username}: ${msg.text ? msg.text.substring(0, 20) + (msg.text.length > 20 ? '...' : '') : '[Image]'}</span>
                     <button class="delete-btn" onclick="deleteMessage(${index})">Delete</button>
                 `;
                 messageList.appendChild(item);
@@ -506,49 +638,15 @@
         
         function deleteMessage(index) {
             messages.splice(index, 1);
+            saveData();
             renderMessages();
         }
         
         function clearAllMessages() {
             if (confirm('Are you sure you want to clear all messages?')) {
                 messages = [];
+                saveData();
                 renderMessages();
-            }
-        }
-        
-        // Drag functionality
-        function startDrag(e) {
-            draggedElement = e.target;
-            draggedElement.classList.add('dragging');
-            
-            const rect = draggedElement.getBoundingClientRect();
-            dragOffset.x = e.clientX - rect.left;
-            dragOffset.y = e.clientY - rect.top;
-            
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', endDrag);
-            e.preventDefault();
-        }
-        
-        function drag(e) {
-            if (draggedElement) {
-                const chatRect = document.getElementById('chatArea').getBoundingClientRect();
-                const x = e.clientX - chatRect.left - dragOffset.x;
-                const y = e.clientY - chatRect.top - dragOffset.y;
-                
-                draggedElement.style.position = 'absolute';
-                draggedElement.style.left = Math.max(0, Math.min(x, chatRect.width - draggedElement.offsetWidth)) + 'px';
-                draggedElement.style.top = Math.max(0, Math.min(y, chatRect.height - draggedElement.offsetHeight)) + 'px';
-                draggedElement.style.zIndex = '1000';
-            }
-        }
-        
-        function endDrag(e) {
-            if (draggedElement) {
-                draggedElement.classList.remove('dragging');
-                draggedElement = null;
-                document.removeEventListener('mousemove', drag);
-                document.removeEventListener('mouseup', endDrag);
             }
         }
         
@@ -556,17 +654,36 @@
         function downloadImage() {
             const phoneFrame = document.getElementById('phoneFrame');
             
+            // Get device pixel ratio for crisp images on retina displays
+            const dpr = window.devicePixelRatio || 1;
+            
             html2canvas(phoneFrame, {
                 backgroundColor: '#121214',
-                scale: 2,
+                scale: dpr,
                 width: 375,
                 height: 667,
                 useCORS: true,
-                allowTaint: true
+                allowTaint: true,
+                logging: false,
+                imageTimeout: 0,
+                removeContainer: true,
+                foreignObjectRendering: false,
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: 375,
+                windowHeight: 667
             }).then(canvas => {
+                const outputCanvas = document.createElement('canvas');
+                const outputCtx = outputCanvas.getContext('2d');
+                
+                outputCanvas.width = 375 * dpr;
+                outputCanvas.height = 667 * dpr;
+                
+                outputCtx.drawImage(canvas, 0, 0, 375 * dpr, 667 * dpr);
+                
                 const link = document.createElement('a');
                 link.download = 'roblox-chat-' + Date.now() + '.png';
-                link.href = canvas.toDataURL();
+                link.href = outputCanvas.toDataURL('image/png', 1.0);
                 link.click();
             }).catch(error => {
                 console.error('Error generating image:', error);
@@ -574,43 +691,52 @@
             });
         }
         
-        // Initialize with some sample messages
-        messages = [
-            {
-                id: 1,
-                username: 'jerriiiii',
-                text: 'yea?',
-                align: 'left',
-                profilePic: defaultProfilePics.left,
-                image: null
-            },
-            {
-                id: 2,
-                username: 'You',
-                text: 'i didnt know roblox now has',
-                align: 'right',
-                profilePic: defaultProfilePics.right,
-                image: null
-            },
-            {
-                id: 3,
-                username: 'You',
-                text: 'something like this',
-                align: 'right',
-                profilePic: defaultProfilePics.right,
-                image: null
-            },
-            {
-                id: 4,
-                username: 'You',
-                text: 'xD',
-                align: 'right',
-                profilePic: defaultProfilePics.right,
-                image: null
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            renderCharacters();
+            renderMessages();
+            
+            // If no messages exist, add some sample messages
+            if (messages.length === 0) {
+                messages = [
+                    {
+                        id: 1,
+                        username: 'jerriiiii',
+                        text: 'yea?',
+                        align: 'left',
+                        profilePic: defaultProfilePics.left,
+                        image: null
+                    },
+                    {
+                        id: 2,
+                        username: 'You',
+                        text: 'i didnt know roblox now has',
+                        align: 'right',
+                        profilePic: defaultProfilePics.right,
+                        image: null
+                    },
+                    {
+                        id: 3,
+                        username: 'You',
+                        text: 'something like this',
+                        align: 'right',
+                        profilePic: defaultProfilePics.right,
+                        image: null
+                    },
+                    {
+                        id: 4,
+                        username: 'You',
+                        text: 'xD',
+                        align: 'right',
+                        profilePic: defaultProfilePics.right,
+                        image: null
+                    }
+                ];
+                saveData();
+                renderMessages();
             }
-        ];
-        
-        renderMessages();
+        });
     </script>
 </body>
 </html>
