@@ -63,6 +63,7 @@
       margin-right: 15px;
       cursor: pointer;
       object-fit: contain;
+      flex-shrink: 0;
     }
 
     .start-btn {
@@ -72,6 +73,7 @@
       height: 32px;
       object-fit: contain;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     .header-profile {
@@ -98,7 +100,7 @@
     .auto-page .chat-area { overflow:hidden; }
 
     .message-group {
-      margin-bottom:20px;
+      margin-bottom:8px; /* Reduced from 20px to remove large gaps */
       position:relative;
       display:flex;
       flex-direction:column;
@@ -109,6 +111,7 @@
       display:flex;
       align-items:flex-start;
       max-width:100%;
+      margin-bottom:2px; /* Small gap between messages in same group */
     }
     .message-group.right .message-row { flex-direction:row-reverse; }
 
@@ -150,27 +153,7 @@
       background:#313139;
     }
 
-    /* Chat bubble tail pointing to profile picture - only for first message in group */
-    .message-row:first-of-type .message::before {
-      content: '';
-      position: absolute;
-      top: 12px;
-      width: 0;
-      height: 0;
-      border-style: solid;
-    }
-
-    .message-group.left .message-row:first-of-type .message::before {
-      left: -6px;
-      border-width: 6px 8px 6px 0;
-      border-color: transparent #212227 transparent transparent;
-    }
-
-    .message-group.right .message-row:first-of-type .message::before {
-      right: -6px;
-      border-width: 6px 0 6px 8px;
-      border-color: transparent transparent transparent #313139;
-    }
+    /* Removed chat bubble tails - they caused spacing issues and looked bad */
 
     .message-image {
       max-width:200px; max-height:200px; border-radius:12px; display:block; margin:5px 0; width:auto;
@@ -824,24 +807,38 @@ Character 1: nothing much"></textarea>
       modalCharacterProfilePic.value = '';
     }
 
-    // ===== Manual single page PNG with fixed aspect ratio =====
+    // ===== Manual single page PNG with improved settings for consistent export =====
     function downloadImage(){
       const phoneFrame = document.getElementById('phoneFrame');
+      
+      // Force layout refresh before capturing
+      phoneFrame.style.transform = 'translateZ(0)';
+      
       html2canvas(phoneFrame, {
         backgroundColor: '#121214',
         scale: 2,
         width: 375,
-        height: 812, // 9:16 ratio
+        height: 812,
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        logging: false,
+        imageTimeout: 0,
+        removeContainer: true,
+        foreignObjectRendering: false,
+        ignoreElements: function(element) {
+          // Skip problematic elements that might cause stretching
+          return element.tagName === 'IFRAME' || element.tagName === 'OBJECT';
+        }
       }).then(canvas => {
+        phoneFrame.style.transform = '';
         const a = document.createElement('a');
         a.download = 'roblox-chat-' + Date.now() + '.png';
-        a.href = canvas.toDataURL();
+        a.href = canvas.toDataURL('image/png', 1.0);
         a.click();
       }).catch(err => {
+        phoneFrame.style.transform = '';
         console.error(err);
-        alert('Error generating image.');
+        alert('Error generating image. Try refreshing the page.');
       });
     }
 
@@ -1144,18 +1141,30 @@ Character 1: nothing much"></textarea>
       const page = autoPages[index];
       if (!page) return alert('Page not found.');
       
+      // Force layout refresh
+      page.frame.style.transform = 'translateZ(0)';
+      
       const canvas = await html2canvas(page.frame, {
         backgroundColor: '#121214',
         scale: 2,
         width: 375,
-        height: 812, // 9:16 ratio
+        height: 812,
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        logging: false,
+        imageTimeout: 0,
+        removeContainer: true,
+        foreignObjectRendering: false,
+        ignoreElements: function(element) {
+          return element.tagName === 'IFRAME' || element.tagName === 'OBJECT';
+        }
       });
+      
+      page.frame.style.transform = '';
       
       const a = document.createElement('a');
       a.download = `frcg-page-${index + 1}.png`;
-      a.href = canvas.toDataURL();
+      a.href = canvas.toDataURL('image/png', 1.0);
       a.click();
     }
 
@@ -1166,21 +1175,33 @@ Character 1: nothing much"></textarea>
       }
       
       for (let i = 0; i < autoPages.length; i++) {
+        // Force layout refresh
+        autoPages[i].frame.style.transform = 'translateZ(0)';
+        
         const canvas = await html2canvas(autoPages[i].frame, {
           backgroundColor: '#121214',
           scale: 2,
           width: 375,
-          height: 812, // 9:16 ratio
+          height: 812,
           useCORS: true,
-          allowTaint: true
+          allowTaint: true,
+          logging: false,
+          imageTimeout: 0,
+          removeContainer: true,
+          foreignObjectRendering: false,
+          ignoreElements: function(element) {
+            return element.tagName === 'IFRAME' || element.tagName === 'OBJECT';
+          }
         });
+        
+        autoPages[i].frame.style.transform = '';
         
         const a = document.createElement('a');
         a.download = `frcg-page-${i + 1}.png`;
-        a.href = canvas.toDataURL();
+        a.href = canvas.toDataURL('image/png', 1.0);
         a.click();
         
-        await new Promise(r => setTimeout(r, 150));
+        await new Promise(r => setTimeout(r, 200)); // Slightly longer delay
       }
     }
 
