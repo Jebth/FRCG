@@ -154,27 +154,27 @@
     .message-row:first-of-type .message::before {
       content: '';
       position: absolute;
-      top: 15px;
+      top: 12px;
       width: 0;
       height: 0;
       border-style: solid;
     }
 
     .message-group.left .message-row:first-of-type .message::before {
-      left: -8px;
-      border-width: 8px 12px 8px 0;
+      left: -6px;
+      border-width: 6px 8px 6px 0;
       border-color: transparent #212227 transparent transparent;
     }
 
     .message-group.right .message-row:first-of-type .message::before {
-      right: -8px;
-      border-width: 8px 0 8px 12px;
+      right: -6px;
+      border-width: 6px 0 6px 8px;
       border-color: transparent transparent transparent #313139;
     }
 
     .message-image {
-      max-width:200px; max-height:200px; border-radius:12px; display:block; margin:5px 0;
-      object-fit:cover; width:auto; height:auto;
+      max-width:200px; max-height:200px; border-radius:12px; display:block; margin:5px 0; width:auto;
+      object-fit:cover;
     }
 
     .control-group { margin-bottom:20px; }
@@ -234,12 +234,9 @@
     @media (max-width:768px){
       body { flex-direction:column; }
       .controls { width:100%; height:300px; }
-      .preview-container { height:calc(100vh - 300px); padding:10px; }
-      .phone-frame { width:90%; max-width:375px; height:auto; max-height:600px; }
+      .preview-container { height:calc(100vh - 300px); }
+      .phone-frame { width:90%; max-width:375px; }
       .page-controls { width:90%; max-width:375px; }
-      .crop-container { max-width:95vw; max-height:80vh; padding:15px; }
-      .crop-area { max-width:300px; max-height:300px; }
-      .modal { width:95%; max-width:400px; }
     }
 
     /* Loader (prevent spamming) */
@@ -268,75 +265,6 @@
 
     /* small icon buttons inline */
     .icon-btn { background:#666; padding:6px 8px; border-radius:6px; margin-left:6px; font-size:13px; }
-
-    /* Image cropper modal */
-    .crop-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 20000;
-    }
-    .crop-modal.active { display: flex; }
-    .crop-container {
-      position: relative;
-      max-width: 90vw;
-      max-height: 90vh;
-      background: #2a2a2a;
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .crop-area {
-      position: relative;
-      border: 2px solid #555;
-      margin: 10px 0;
-      overflow: hidden;
-    }
-    .crop-image {
-      display: block;
-      max-width: none;
-      cursor: move;
-      user-select: none;
-      -webkit-user-drag: none;
-    }
-    .crop-overlay {
-      position: absolute;
-      border: 2px solid #4a9eff;
-      background: rgba(74, 158, 255, 0.1);
-      cursor: move;
-      box-sizing: border-box;
-    }
-    .crop-handle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #4a9eff;
-      border: 1px solid white;
-      cursor: nw-resize;
-    }
-    .crop-handle.nw { top: -5px; left: -5px; cursor: nw-resize; }
-    .crop-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
-    .crop-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
-    .crop-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
-    .crop-controls {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-    .crop-info {
-      color: #ccc;
-      font-size: 12px;
-      margin-bottom: 10px;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
@@ -454,27 +382,6 @@ Character 1: nothing much"></textarea>
     </svg>
   </div>
 
-  <!-- Crop Modal -->
-  <div id="cropModal" class="crop-modal">
-    <div class="crop-container">
-      <h3 style="color: white; margin-bottom: 10px;">Crop Image</h3>
-      <div class="crop-info">Click and drag to position the crop area. Use handles to resize.</div>
-      <div class="crop-area" id="cropArea">
-        <img id="cropImage" class="crop-image" />
-        <div class="crop-overlay" id="cropOverlay">
-          <div class="crop-handle nw"></div>
-          <div class="crop-handle ne"></div>
-          <div class="crop-handle sw"></div>
-          <div class="crop-handle se"></div>
-        </div>
-      </div>
-      <div class="crop-controls">
-        <button id="cropCancel">Cancel</button>
-        <button id="cropApply">Apply Crop</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Modal (for editing messages & characters) -->
   <div id="modalOverlay" class="modal-overlay" role="dialog" aria-hidden="true">
     <div class="modal" role="document" aria-labelledby="modalTitle">
@@ -485,12 +392,12 @@ Character 1: nothing much"></textarea>
         <input id="modalUsername" type="text" />
       </div>
 
-      <div class="row" id="modalTextRow">
+      <div class="row">
         <label class="small">Text</label>
         <textarea id="modalText" rows="4"></textarea>
       </div>
 
-      <div class="row" id="modalAlignRow">
+      <div class="row">
         <label class="small">Alignment</label>
         <select id="modalAlign">
           <option value="left">Left (Other)</option>
@@ -498,17 +405,16 @@ Character 1: nothing much"></textarea>
         </select>
       </div>
 
-      <div class="row checkbox-group" id="modalUsernameRow">
+      <div class="row checkbox-group">
         <input id="modalShowUsername" type="checkbox" />
         <label for="modalShowUsername">Show Username</label>
       </div>
 
-      <div class="row" id="modalImageRow">
-        <label class="small">Image</label>
+      <div class="row">
+        <label class="small">Message Image (optional)</label>
         <input id="modalImageFile" type="file" accept="image/*" />
         <img id="modalImagePreview" class="img-preview" style="display:none;" />
-        <button id="modalCropBtn" style="display:none; margin-top:8px;">Crop Image</button>
-        <div style="display:flex; align-items:center; gap:8px; margin-top:8px;" id="modalImageSizeRow">
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
           <label class="small">Image size</label>
           <input id="modalImageSize" type="range" min="40" max="400" value="200" />
           <span id="modalImageSizeVal" class="small">200</span>
@@ -529,8 +435,6 @@ Character 1: nothing much"></textarea>
     let savedCharacters = [];
     let autoPages = []; // [{frame, chatArea}]
     let currentEditingIndex = null; // index in messages when modal editing
-    let currentCropCallback = null; // callback for crop result
-    let cropData = { x: 0, y: 0, width: 100, height: 100 }; // crop rectangle
 
     // ===== OpenRouter / DeepSeek (optional) =====
     const OPENROUTER_API_KEY = "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";
@@ -560,6 +464,14 @@ Character 1: nothing much"></textarea>
       }
     }
     function saveData(){
+      localStorage.setItem('roblox-chat-messages', JSON.stringify(messages));
+      localStorage.setItem('roblox-chat-characters', JSON.stringify(savedCharacters));
+    }
+    function saveHeaderData(){
+      const headerData = {
+        name: document.getElementById('headerName').value,
+        profilePic: document.getElementById('headerProfilePicImg').src
+      };
       localStorage.setItem('roblox-chat-header', JSON.stringify(headerData));
     }
 
@@ -574,14 +486,7 @@ Character 1: nothing much"></textarea>
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = ev => { 
-        // Auto-open crop modal for header profile pic
-        openCropModal(ev.target.result, (croppedDataUrl) => {
-          document.getElementById('headerProfilePicImg').src = croppedDataUrl; 
-          saveHeaderData(); 
-          buildPagesFromMessages();
-        });
-      };
+      reader.onload = ev => { document.getElementById('headerProfilePicImg').src = ev.target.result; saveHeaderData(); buildPagesFromMessages(); };
       reader.readAsDataURL(file);
     });
     document.getElementById('headerName').addEventListener('input', e=>{
@@ -596,16 +501,8 @@ Character 1: nothing much"></textarea>
       if (!file) return;
       const reader = new FileReader();
       reader.onload = ev => {
-        // Show preview and crop option
         const preview = document.getElementById('characterPreview');
-        preview.src = ev.target.result; 
-        preview.style.display = 'block';
-        // Auto-open crop modal for character profile pics
-        openCropModal(ev.target.result, (croppedDataUrl) => {
-          preview.src = croppedDataUrl;
-          // Store cropped data for saving
-          preview.dataset.croppedData = croppedDataUrl;
-        });
+        preview.src = ev.target.result; preview.style.display = 'block';
       };
       reader.readAsDataURL(file);
     });
@@ -620,16 +517,17 @@ Character 1: nothing much"></textarea>
 
     function saveCharacter(){
       const name = document.getElementById('characterName').value.trim();
-      const preview = document.getElementById('characterPreview');
+      const file = document.getElementById('characterProfilePic').files[0];
       if (!name) return alert('Please enter a character name');
-      if (!preview.src) return alert('Please upload a profile picture');
+      if (!file) return alert('Please upload a profile picture');
 
-      // Use cropped data if available, otherwise use original
-      const profilePicData = preview.dataset.croppedData || preview.src;
-      const character = { id: Date.now(), name, profilePic: profilePicData };
-      
-      savedCharacters.push(character);
-      saveData(); renderCharacters(); clearCharacterInputs(); renderMessages(); buildPagesFromMessages();
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const character = { id: Date.now(), name, profilePic: ev.target.result };
+        savedCharacters.push(character);
+        saveData(); renderCharacters(); clearCharacterInputs(); renderMessages(); buildPagesFromMessages();
+      };
+      reader.readAsDataURL(file);
     }
     function clearCharacterInputs(){
       document.getElementById('characterName').value = '';
@@ -803,11 +701,7 @@ Character 1: nothing much"></textarea>
           if (msg.text){ const t=document.createElement('span'); t.textContent = msg.text; bubble.appendChild(t); }
           if (msg.image){
             const im=document.createElement('img'); im.src=msg.image; im.className='message-image';
-            // Use proper sizing - maintain aspect ratio
-            if (msg.imageSize && msg.imageSize !== 200) {
-              im.style.maxWidth = msg.imageSize + 'px';
-              im.style.maxHeight = msg.imageSize + 'px';
-            }
+            im.style.width = (msg.imageSize ? msg.imageSize + 'px' : '200px');
             bubble.appendChild(im);
           }
           if (msg.placeholderImage){
@@ -895,21 +789,8 @@ Character 1: nothing much"></textarea>
       const f = e.target.files[0];
       if (!f) return;
       const r = new FileReader();
-      r.onload = ev => { 
-        modalImagePreview.src = ev.target.result; 
-        modalImagePreview.style.display='block'; 
-        modalImagePreview.style.width = modalImageSize.value + 'px';
-        document.getElementById('modalCropBtn').style.display = 'inline-block';
-      };
+      r.onload = ev => { modalImagePreview.src = ev.target.result; modalImagePreview.style.display='block'; modalImagePreview.style.width = modalImageSize.value + 'px'; };
       r.readAsDataURL(f);
-    });
-
-    // Crop button in modal
-    document.getElementById('modalCropBtn').addEventListener('click', ()=> {
-      if (!modalImagePreview.src) return;
-      openCropModal(modalImagePreview.src, (croppedDataUrl) => {
-        modalImagePreview.src = croppedDataUrl;
-      });
     });
 
     modalCancelBtn.addEventListener('click', ()=> { closeModal(); });
@@ -970,14 +851,6 @@ Character 1: nothing much"></textarea>
       currentEditingIndex = index;
       modalOverlay.dataset.charIndex = '';
       document.getElementById('modalTitle').textContent = 'Edit Message';
-      
-      // Show all rows for message editing
-      document.getElementById('modalTextRow').style.display = 'block';
-      document.getElementById('modalAlignRow').style.display = 'block';
-      document.getElementById('modalUsernameRow').style.display = 'block';
-      document.getElementById('modalImageRow').style.display = 'block';
-      document.getElementById('modalImageSizeRow').style.display = 'flex';
-      
       modalUsername.value = m.username || '';
       modalText.value = m.text || '';
       modalAlign.value = m.align || 'left';
@@ -985,14 +858,9 @@ Character 1: nothing much"></textarea>
       modalImageSize.value = m.imageSize || 200;
       modalImageSizeVal.textContent = modalImageSize.value;
       if (m.image){
-        modalImagePreview.src = m.image; 
-        modalImagePreview.style.display='block'; 
-        modalImagePreview.style.width = (m.imageSize || 200) + 'px';
-        document.getElementById('modalCropBtn').style.display = 'inline-block';
+        modalImagePreview.src = m.image; modalImagePreview.style.display='block'; modalImagePreview.style.width = (m.imageSize || 200) + 'px';
       } else {
-        modalImagePreview.style.display='none'; 
-        modalImagePreview.src='';
-        document.getElementById('modalCropBtn').style.display = 'none';
+        modalImagePreview.style.display='none'; modalImagePreview.src='';
       }
       modalImageFile.value = '';
       modalOverlay.classList.add('active');
@@ -1003,19 +871,12 @@ Character 1: nothing much"></textarea>
       currentEditingIndex = null;
       modalOverlay.dataset.charIndex = index;
       document.getElementById('modalTitle').textContent = 'Edit Character';
-      
-      // Hide unnecessary rows for character editing, only show username and image
-      document.getElementById('modalTextRow').style.display = 'none';
-      document.getElementById('modalAlignRow').style.display = 'none';
-      document.getElementById('modalUsernameRow').style.display = 'none';
-      document.getElementById('modalImageSizeRow').style.display = 'none';
-      document.getElementById('modalImageRow').style.display = 'block';
-      
       modalUsername.value = char.name || '';
-      modalImagePreview.src = char.profilePic; 
-      modalImagePreview.style.display='block'; 
-      modalImagePreview.style.width='80px';
-      document.getElementById('modalCropBtn').style.display = 'inline-block';
+      modalText.value = ''; // not used
+      modalAlign.value = 'left';
+      modalShowUsername.checked = true;
+      modalImagePreview.src = char.profilePic; modalImagePreview.style.display='block'; modalImagePreview.style.width='80px';
+      modalImageSize.value = 80; modalImageSizeVal.textContent = '80';
       modalOverlay.classList.add('active');
     }
 
@@ -1024,191 +885,7 @@ Character 1: nothing much"></textarea>
       currentEditingIndex = null;
       modalOverlay.dataset.charIndex = '';
       modalImagePreview.src=''; modalImagePreview.style.display='none';
-      document.getElementById('modalCropBtn').style.display = 'none';
     }
-
-    // ===== Cropping System =====
-    function openCropModal(imageSrc, callback) {
-      currentCropCallback = callback;
-      const cropModal = document.getElementById('cropModal');
-      const cropImage = document.getElementById('cropImage');
-      const cropArea = document.getElementById('cropArea');
-      const cropOverlay = document.getElementById('cropOverlay');
-
-      cropImage.src = imageSrc;
-      cropImage.onload = () => {
-        // Set crop area size based on image
-        const maxWidth = Math.min(cropImage.naturalWidth, 400);
-        const maxHeight = Math.min(cropImage.naturalHeight, 400);
-        const aspectRatio = cropImage.naturalWidth / cropImage.naturalHeight;
-        
-        let displayWidth, displayHeight;
-        if (aspectRatio > 1) {
-          displayWidth = maxWidth;
-          displayHeight = maxWidth / aspectRatio;
-        } else {
-          displayHeight = maxHeight;
-          displayWidth = maxHeight * aspectRatio;
-        }
-        
-        cropImage.style.width = displayWidth + 'px';
-        cropImage.style.height = displayHeight + 'px';
-        cropArea.style.width = displayWidth + 'px';
-        cropArea.style.height = displayHeight + 'px';
-
-        // Initialize crop overlay (square in center)
-        const cropSize = Math.min(displayWidth, displayHeight) * 0.6;
-        cropData = {
-          x: (displayWidth - cropSize) / 2,
-          y: (displayHeight - cropSize) / 2,
-          width: cropSize,
-          height: cropSize
-        };
-        updateCropOverlay();
-        setupCropInteractions();
-      };
-      
-      cropModal.classList.add('active');
-    }
-
-    function updateCropOverlay() {
-      const cropOverlay = document.getElementById('cropOverlay');
-      cropOverlay.style.left = cropData.x + 'px';
-      cropOverlay.style.top = cropData.y + 'px';
-      cropOverlay.style.width = cropData.width + 'px';
-      cropOverlay.style.height = cropData.height + 'px';
-    }
-
-    function setupCropInteractions() {
-      const cropOverlay = document.getElementById('cropOverlay');
-      const cropArea = document.getElementById('cropArea');
-      const handles = cropOverlay.querySelectorAll('.crop-handle');
-
-      let isDragging = false;
-      let isResizing = false;
-      let dragStart = { x: 0, y: 0 };
-      let resizeHandle = null;
-
-      // Drag overlay
-      cropOverlay.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('crop-handle')) return;
-        isDragging = true;
-        dragStart = { x: e.clientX - cropData.x, y: e.clientY - cropData.y };
-        e.preventDefault();
-      });
-
-      // Resize handles
-      handles.forEach(handle => {
-        handle.addEventListener('mousedown', (e) => {
-          isResizing = true;
-          resizeHandle = handle.className.split(' ')[1]; // nw, ne, sw, se
-          dragStart = { x: e.clientX, y: e.clientY };
-          e.preventDefault();
-          e.stopPropagation();
-        });
-      });
-
-      // Mouse move
-      document.addEventListener('mousemove', (e) => {
-        const rect = cropArea.getBoundingClientRect();
-        const relativeX = e.clientX - rect.left;
-        const relativeY = e.clientY - rect.top;
-
-        if (isDragging) {
-          cropData.x = Math.max(0, Math.min(cropArea.offsetWidth - cropData.width, e.clientX - rect.left - dragStart.x));
-          cropData.y = Math.max(0, Math.min(cropArea.offsetHeight - cropData.height, e.clientY - rect.top - dragStart.y));
-          updateCropOverlay();
-        } else if (isResizing && resizeHandle) {
-          const deltaX = e.clientX - dragStart.x;
-          const deltaY = e.clientY - dragStart.y;
-
-          switch (resizeHandle) {
-            case 'nw':
-              const newWidth = cropData.width - deltaX;
-              const newHeight = cropData.height - deltaY;
-              if (newWidth > 20 && newHeight > 20) {
-                cropData.width = newWidth;
-                cropData.height = newHeight;
-                cropData.x += deltaX;
-                cropData.y += deltaY;
-              }
-              break;
-            case 'ne':
-              if (cropData.width + deltaX > 20 && cropData.height - deltaY > 20) {
-                cropData.width += deltaX;
-                cropData.height -= deltaY;
-                cropData.y += deltaY;
-              }
-              break;
-            case 'sw':
-              if (cropData.width - deltaX > 20 && cropData.height + deltaY > 20) {
-                cropData.width -= deltaX;
-                cropData.height += deltaY;
-                cropData.x += deltaX;
-              }
-              break;
-            case 'se':
-              if (cropData.width + deltaX > 20 && cropData.height + deltaY > 20) {
-                cropData.width += deltaX;
-                cropData.height += deltaY;
-              }
-              break;
-          }
-
-          // Constrain to crop area
-          cropData.x = Math.max(0, Math.min(cropArea.offsetWidth - cropData.width, cropData.x));
-          cropData.y = Math.max(0, Math.min(cropArea.offsetHeight - cropData.height, cropData.y));
-          cropData.width = Math.min(cropArea.offsetWidth - cropData.x, cropData.width);
-          cropData.height = Math.min(cropArea.offsetHeight - cropData.y, cropData.height);
-
-          dragStart = { x: e.clientX, y: e.clientY };
-          updateCropOverlay();
-        }
-      });
-
-      // Mouse up
-      document.addEventListener('mouseup', () => {
-        isDragging = false;
-        isResizing = false;
-        resizeHandle = null;
-      });
-    }
-
-    function applyCrop() {
-      const cropImage = document.getElementById('cropImage');
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      // Calculate scale factor
-      const scaleX = cropImage.naturalWidth / cropImage.offsetWidth;
-      const scaleY = cropImage.naturalHeight / cropImage.offsetHeight;
-
-      // Set canvas size to crop size
-      canvas.width = cropData.width * scaleX;
-      canvas.height = cropData.height * scaleY;
-
-      // Draw cropped image
-      ctx.drawImage(
-        cropImage,
-        cropData.x * scaleX, cropData.y * scaleY, cropData.width * scaleX, cropData.height * scaleY,
-        0, 0, canvas.width, canvas.height
-      );
-
-      const croppedDataUrl = canvas.toDataURL('image/png');
-      if (currentCropCallback) {
-        currentCropCallback(croppedDataUrl);
-      }
-      closeCropModal();
-    }
-
-    function closeCropModal() {
-      document.getElementById('cropModal').classList.remove('active');
-      currentCropCallback = null;
-    }
-
-    // Crop modal event listeners
-    document.getElementById('cropApply').addEventListener('click', applyCrop);
-    document.getElementById('cropCancel').addEventListener('click', closeCropModal);
 
     function editMessage(index){
       openEditMessageModal(index);
@@ -1227,57 +904,14 @@ Character 1: nothing much"></textarea>
     // ===== Manual single page PNG =====
     function downloadImage(){
       const phoneFrame = document.getElementById('phoneFrame');
-      
-      // Ensure all images are loaded before capture
-      const images = phoneFrame.querySelectorAll('img');
-      const imagePromises = Array.from(images).map(img => {
-        return new Promise((resolve) => {
-          if (img.complete) {
-            resolve();
-          } else {
-            img.onload = () => resolve();
-            img.onerror = () => resolve(); // Continue even if image fails to load
-          }
-        });
-      });
-      
-      Promise.all(imagePromises).then(() => {
-        html2canvas(phoneFrame, {
-          backgroundColor:'#121214',
-          scale: window.devicePixelRatio || 2, 
-          width:375, 
-          height:667, 
-          useCORS:true, 
-          allowTaint:true,
-          foreignObjectRendering: false,
-          imageTimeout: 0,
-          logging: false
-        }).then(canvas=>{
-          // Create download
-          if (navigator.share && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) {
-            // Mobile: convert to blob and share
-            canvas.toBlob(blob => {
-              const file = new File([blob], 'roblox-chat-' + Date.now() + '.png', { type: 'image/png' });
-              navigator.share({ files: [file] }).catch(() => {
-                // Fallback to download if share fails
-                const a = document.createElement('a');
-                a.download = 'roblox-chat-' + Date.now() + '.png';
-                a.href = canvas.toDataURL(); 
-                a.click();
-              });
-            });
-          } else {
-            // Desktop: direct download
-            const a = document.createElement('a');
-            a.download = 'roblox-chat-' + Date.now() + '.png';
-            a.href = canvas.toDataURL(); 
-            a.click();
-          }
-        }).catch(err=>{ 
-          console.error(err); 
-          alert('Error generating image. Try again or check your internet connection.'); 
-        });
-      });
+      html2canvas(phoneFrame, {
+        backgroundColor:'#121214',
+        scale:2, width:375, height:667, useCORS:true, allowTaint:true
+      }).then(canvas=>{
+        const a = document.createElement('a');
+        a.download = 'roblox-chat-' + Date.now() + '.png';
+        a.href = canvas.toDataURL(); a.click();
+      }).catch(err=>{ console.error(err); alert('Error generating image.'); });
     }
 
     // ===== Automate: push into Message List (then build pages) =====
@@ -1514,10 +1148,7 @@ Character 1: nothing much"></textarea>
       if (msg.text){ bubble.textContent = msg.text; }
       if (msg.image){
         const im = document.createElement('img'); im.src = msg.image; im.className = 'message-image';
-        if (msg.imageSize && msg.imageSize !== 200) {
-          im.style.maxWidth = msg.imageSize + 'px';
-          im.style.maxHeight = msg.imageSize + 'px';
-        }
+        im.style.width = (msg.imageSize ? msg.imageSize+'px' : '200px');
         bubble.appendChild(im);
       }
       if (msg.placeholderImage){
@@ -1550,14 +1181,7 @@ Character 1: nothing much"></textarea>
       if (!page) return alert('Page not found.');
       const canvas = await html2canvas(page.frame, {
         backgroundColor:'#121214',
-        scale: window.devicePixelRatio || 2, 
-        width:375, 
-        height:667, 
-        useCORS:true, 
-        allowTaint:true,
-        foreignObjectRendering: false,
-        imageTimeout: 0,
-        logging: false
+        scale:2, width:375, height:667, useCORS:true, allowTaint:true
       });
       const a = document.createElement('a');
       a.download = `frcg-page-${index+1}.png`;
@@ -1569,60 +1193,17 @@ Character 1: nothing much"></textarea>
         alert('No pages to export. Build pages first.');
         return;
       }
-      
       for (let i=0;i<autoPages.length;i++){
-        // Ensure all images are loaded before capture
-        const images = autoPages[i].frame.querySelectorAll('img');
-        const imagePromises = Array.from(images).map(img => {
-          return new Promise((resolve) => {
-            if (img.complete) {
-              resolve();
-            } else {
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-            }
-          });
-        });
-        
-        await Promise.all(imagePromises);
-        
         const canvas = await html2canvas(autoPages[i].frame, {
           backgroundColor:'#121214',
-          scale: window.devicePixelRatio || 2, 
-          width:375, 
-          height:667, 
-          useCORS:true, 
-          allowTaint:true,
-          foreignObjectRendering: false,
-          imageTimeout: 0,
-          logging: false
+          scale:2, width:375, height:667, useCORS:true, allowTaint:true
         });
-        
-        if (navigator.share && i === 0 && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) {
-          // On mobile, share the first image and let user decide on others
-          canvas.toBlob(blob => {
-            const file = new File([blob], `frcg-page-${i+1}.png`, { type: 'image/png' });
-            navigator.share({ files: [file] }).catch(() => {
-              // Fallback to download
-              const a = document.createElement('a');
-              a.download = `frcg-page-${i+1}.png`;
-              a.href = canvas.toDataURL();
-              a.click();
-            });
-          });
-        } else {
-          const a = document.createElement('a');
-          a.download = `frcg-page-${i+1}.png`;
-          a.href = canvas.toDataURL();
-          a.click();
-        }
-        
-        // Delay between downloads
-        await new Promise(r=>setTimeout(r, 300));
-      }
-      
-      if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) && autoPages.length > 1) {
-        alert(`${autoPages.length} pages ready! Use individual "Save Page" buttons below each page for mobile.`);
+        const a = document.createElement('a');
+        a.download = `frcg-page-${i+1}.png`;
+        a.href = canvas.toDataURL(); a.click();
+        // small delay helps some browsers fire multiple downloads
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise(r=>setTimeout(r,150));
       }
     }
 
